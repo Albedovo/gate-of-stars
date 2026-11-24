@@ -486,6 +486,7 @@ function render(s) {
   $$('#mus, #homeMus').forEach(b => b.onclick = () => { SFX.unlock(); MUSIC.toggle(); syncMus(); });
   $('#lang').onclick = $('#homeLang').onclick = () => LANG.toggle();
   document.addEventListener('langchange', () => { if (!S) return; render(S); if (S.phase === 'lobby') renderHome(); enterScene(ui.scene, true); if (ui.ov) { const n = ui.ov; openOv(n); } });
+  { const q = new URLSearchParams(location.search); if (q.get('scene')) setTimeout(() => { enterScene(q.get('scene'), true); if (q.get('ov')) openOv(q.get('ov')); }, 900); }   // 截图用：?scene=gallery&ov=mural
   setInterval(() => { tickHUD(); if (ui.ov === 'star') gateUpdate(); if (ui.ov === 'orders' && S && S.secret.order) { const b = $('#ordBar'); if (b) b.style.width = Math.max(0, (S.secret.order.deadline - NET.now()) / cfg.orderTime * 100) + '%'; } }, 200);
 })();
 </script>

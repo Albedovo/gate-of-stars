@@ -52,10 +52,22 @@
   .quote { border-left:5px solid var(--orange); padding:4px 0 4px 16px; font-size:17px; font-weight:700; margin:18px 0; }
   footer { padding:56px 0 70px; color:var(--dust); font-size:13px; text-align:center; }
   body:not(.en) .en { display:none; } body.en .zh { display:none; } body.en span.en, body.en b.en, body.en small.en { display:inline; }
+  .trial { margin:0 0 44px; } .th { display:flex; align-items:center; gap:14px; font-size:26px; font-weight:900; margin-bottom:12px; } .th b { width:42px; height:42px; border-radius:50%; background:var(--yellow); color:var(--ink); display:grid; place-items:center; font-size:20px; }
+  .shots { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:22px; align-items:start; } @media(max-width:760px){ .shots { grid-template-columns:1fr; } }
+  .col .ph { display:inline-block; width:calc(50% - 6px); margin:0 6px 0 0; vertical-align:top; } .col .ph:last-of-type { margin:0; } .col.wide .pc { width:100%; margin:0; }
+  figure { margin:0; } figure img { width:100%; display:block; border-radius:18px; border:3px solid var(--cream); } .ph img { border-radius:22px; }
+  .col p { margin:10px 0 0; font-size:14px; font-weight:600; } .col .tag { display:inline-block; margin-right:8px; }
+  .chips { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; } .chips span { border:2px solid #e8dfc755; border-radius:20px; padding:3px 14px; font-weight:700; font-size:14px; } .chips .hl { border-color:var(--orange); color:var(--yellow); } .chips em { font-style:normal; font-weight:600; opacity:.85; }
+  .pair { display:grid; grid-template-columns:7fr 3fr; gap:18px; align-items:start; margin-top:20px; } @media(max-width:760px){ .pair { grid-template-columns:1fr; } }
+  .cap { color:var(--dust); font-size:13px; font-weight:600; margin:8px 0; }
+  .flow { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; } @media(max-width:860px){ .flow { grid-template-columns:1fr 1fr; } }
+  .flow div { background:#0c165899; border:3px solid #e8dfc733; border-radius:18px; padding:14px; } .flow i { font-style:normal; display:grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--yellow); color:var(--ink); font-weight:900; margin-bottom:6px; } .flow b { display:block; font-size:16px; } .flow span { font-size:13px; opacity:.8; font-weight:600; }
+  .fixes { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px; } @media(max-width:760px){ .fixes { grid-template-columns:1fr; } } .fixes div { border-left:4px solid var(--orange); padding:2px 12px; font-size:14px; font-weight:600; } .fixes b { display:block; color:var(--yellow); }
+  .story { font-size:18px; } .quote { font-size:17px; }
 </style>
 </head>
 <body>
-<div class="bar"><div class="wrap"><b>GATE OF STARS</b><a href="#play"><span class="zh">游戏</span><span class="en">Game</span></a><a href="#refs"><span class="zh">参考图</span><span class="en">References</span></a><a href="#story"><span class="zh">剧情设定</span><span class="en">Story</span></a><a href="#process"><span class="zh">AI 制作</span><span class="en">Made with AI</span></a><button class="lang" id="lang">EN</button></div></div>
+<div class="bar"><div class="wrap"><b>GATE OF STARS</b><a href="#play"><span class="zh">游戏</span><span class="en">Game</span></a><a href="#trials"><span class="zh">关卡</span><span class="en">Trials</span></a><a href="#refs"><span class="zh">参考图</span><span class="en">References</span></a><a href="#story"><span class="zh">剧情设定</span><span class="en">Story</span></a><a href="#process"><span class="zh">AI 制作</span><span class="en">Made with AI</span></a><button class="lang" id="lang">EN</button></div></div>
 
 <header class="hero"><div class="wrap">
   <div class="kicker zh">双人合作解谜 · 手机 + 电脑</div><div class="kicker en">TWO-PLAYER CO-OP PUZZLE · PHONE + LAPTOP</div>
@@ -67,100 +79,68 @@
 </div></header>
 
 <section id="play"><div class="wrap wide">
-  <h2><small>THE GAME</small><span class="zh">游戏</span><span class="en">The game</span></h2>
-  <p class="sub zh">完整游戏需要两个人。下面是星象师的视角：拖拽转身，点任意台子进入；旅人由程序模拟，台子上方会提示他此刻在说什么。</p>
-  <p class="sub en">The full game needs two people. Below is the Stargazer’s side: drag to look around, click any console. The Wanderer is simulated, and a note above each console says what they would be saying.</p>
+  <h2><small>THE GAME</small><span class="zh">试玩星象师视角</span><span class="en">Play the Stargazer view</span></h2>
   <div class="frame" id="frame"><button class="go" id="go"><div><b class="zh">▶ 点击开始</b><b class="en">▶ Click to start</b><span class="zh">建议用电脑打开，带声音 ♪</span><span class="en">Best on a laptop, sound on ♪</span></div></button></div>
-  <p class="mobnote zh">星象师界面为电脑设计，请用电脑打开，或<a href="hq.html?demo">直接打开页面</a>。</p>
-  <p class="mobnote en">The Stargazer view is designed for a laptop — open it on a computer, or <a href="hq.html?demo">open the page directly</a>.</p>
-  <p style="margin-top:14px"><a href="hq.html?demo" target="_blank" rel="noopener"><span class="zh">在新窗口全屏打开 ↗</span><span class="en">Open full screen ↗</span></a></p>
-  <div class="card" style="margin-top:26px"><table>
-    <tr><th>#</th><th><span class="zh">旅人（手机）</span><span class="en">WANDERER (PHONE)</span></th><th><span class="zh">星象师（电脑）</span><span class="en">STARGAZER (LAPTOP)</span></th></tr>
-    <tr><td>1 <span class="zh">描星</span><span class="en">Trace</span></td><td><span class="zh">星座廊：擦去壁画上的灰，描述被点亮的星</span><span class="en">Gallery: wipe the dust off, describe the lit stars</span></td><td><span class="zh">星图桌：按口述依次点中对应的星</span><span class="en">Star table: tap the stars as described</span></td></tr>
-    <tr><td>2 <span class="zh">对称门</span><span class="en">Mirror</span></td><td><span class="zh">镜厅：拖火种点灯，转自己的瓷片</span><span class="en">Mirror hall: drag the flame to the lanterns, turn your tiles</span></td><td><span class="zh">对称碑：转瓷片，拼成镜像</span><span class="en">Steles: turn tiles into a mirror image</span></td></tr>
-    <tr><td>3 <span class="zh">星环月相</span><span class="en">Moon rings</span></td><td><span class="zh">月室：在黑暗中用手指的光找到月盘，描述月相（只有符号）</span><span class="en">Moon room: find the discs in the dark with a finger-light, describe the phases (symbols only)</span></td><td><span class="zh">星环仪：查星图册的对照表，转动星环</span><span class="en">Orrery: look up the cipher in the Star Book, turn the rings</span></td></tr>
-    <tr><td>4 <span class="zh">调频校准</span><span class="en">Tuning</span></td><td><span class="zh">星门：看星漂移并反馈</span><span class="en">Gate: watch the star drift and report</span></td><td><span class="zh">调频台：转旋钮；风暴来时按住护盾</span><span class="en">Console: turn knobs; hold the shield in a storm</span></td></tr>
-    <tr><td>5 <span class="zh">星令传递</span><span class="en">Orders</span></td><td><span class="zh">星令殿：摇曲柄通电，互相喊对方面板上的星名</span><span class="en">Order hall: crank to power up, call out names on each other’s panels</span></td><td><span class="zh">星令台：同上</span><span class="en">Order console: same</span></td></tr>
-    <tr><td>6 <span class="zh">祭仪</span><span class="en">Ritual</span></td><td><span class="zh">祭坛：画圈、长按、摇铃、倾倒</span><span class="en">Altar: circle, hold, shake, pour</span></td><td><span class="zh">祭仪卷轴：念出步骤；♪ 步骤要按住「吟唱」</span><span class="en">Scroll: read the steps; hold “Chant” on ♪ steps</span></td></tr>
-  </table></div>
+  <p class="mobnote zh">星象师界面为电脑设计，请用电脑打开，或<a href="hq.html?demo">直接打开页面</a>。</p><p class="mobnote en">Designed for a laptop — <a href="hq.html?demo">open the page directly</a>.</p>
+  <p style="margin-top:12px"><a href="hq.html?demo" target="_blank" rel="noopener"><span class="zh">全屏打开 ↗</span><span class="en">Full screen ↗</span></a></p>
+</div></section>
+
+<section id="trials"><div class="wrap wide">
+  <h2><small>SIX TRIALS</small><span class="zh">六道关卡：手机 × 电脑</span><span class="en">Six trials: phone × laptop</span></h2>
+  <p class="sub zh">每一关，两边看到的画面不同，只能靠说话把拼图拼完整。</p><p class="sub en">Each trial shows each player different things — talk to complete the picture.</p>
+  <div class="trial"><div class="th"><b>1</b><span class="zh">描星</span><span class="en">Trace</span></div>
+ <div class="shots"><div class="col"><figure class="ph"><img src="assets/shots/ph-1-room.jpg" alt="" loading="lazy"></figure><figure class="ph"><img src="assets/shots/ph-1-trial.jpg" alt="" loading="lazy"></figure><p><span class="tag me"><span class="zh">旅人 · 手机</span><span class="en">WANDERER · PHONE</span></span><span class="zh">星座廊 · 擦灰、描述星点</span><span class="en">Gallery · wipe the dust, describe the stars</span></p></div>
+ <div class="col wide"><figure class="pc"><img src="assets/shots/hq-1.jpg" alt="" loading="lazy"></figure><p><span class="tag ai"><span class="zh">星象师 · 电脑</span><span class="en">STARGAZER · LAPTOP</span></span><span class="zh">星图桌 · 照口述点星</span><span class="en">Star table · tap what you hear</span></p></div></div></div>
+<div class="trial"><div class="th"><b>2</b><span class="zh">对称门</span><span class="en">Mirror</span></div>
+ <div class="shots"><div class="col"><figure class="ph"><img src="assets/shots/ph-2-room.jpg" alt="" loading="lazy"></figure><figure class="ph"><img src="assets/shots/ph-2-trial.jpg" alt="" loading="lazy"></figure><p><span class="tag me"><span class="zh">旅人 · 手机</span><span class="en">WANDERER · PHONE</span></span><span class="zh">镜厅 · 火种点灯、转瓷片</span><span class="en">Mirror hall · light the lanterns, turn tiles</span></p></div>
+ <div class="col wide"><figure class="pc"><img src="assets/shots/hq-2.jpg" alt="" loading="lazy"></figure><p><span class="tag ai"><span class="zh">星象师 · 电脑</span><span class="en">STARGAZER · LAPTOP</span></span><span class="zh">对称碑 · 拼成镜像</span><span class="en">Steles · match the mirror</span></p></div></div></div>
+<div class="trial"><div class="th"><b>3</b><span class="zh">星环月相</span><span class="en">Moon rings</span></div>
+ <div class="shots"><div class="col"><figure class="ph"><img src="assets/shots/ph-3-room.jpg" alt="" loading="lazy"></figure><figure class="ph"><img src="assets/shots/ph-3-trial.jpg" alt="" loading="lazy"></figure><p><span class="tag me"><span class="zh">旅人 · 手机</span><span class="en">WANDERER · PHONE</span></span><span class="zh">月室 · 黑暗里找月盘</span><span class="en">Moon room · find discs in the dark</span></p></div>
+ <div class="col wide"><figure class="pc"><img src="assets/shots/hq-3.jpg" alt="" loading="lazy"></figure><p><span class="tag ai"><span class="zh">星象师 · 电脑</span><span class="en">STARGAZER · LAPTOP</span></span><span class="zh">星环仪 · 查对照表转星环</span><span class="en">Orrery · look up the cipher, turn rings</span></p></div></div></div>
+<div class="trial"><div class="th"><b>4</b><span class="zh">调频校准</span><span class="en">Tuning</span></div>
+ <div class="shots"><div class="col"><figure class="ph"><img src="assets/shots/ph-4-room.jpg" alt="" loading="lazy"></figure><figure class="ph"><img src="assets/shots/ph-4-trial.jpg" alt="" loading="lazy"></figure><p><span class="tag me"><span class="zh">旅人 · 手机</span><span class="en">WANDERER · PHONE</span></span><span class="zh">星门 · 看星漂移并反馈</span><span class="en">Gate · watch the star drift</span></p></div>
+ <div class="col wide"><figure class="pc"><img src="assets/shots/hq-4.jpg" alt="" loading="lazy"></figure><p><span class="tag ai"><span class="zh">星象师 · 电脑</span><span class="en">STARGAZER · LAPTOP</span></span><span class="zh">调频台 · 转旋钮，风暴按护盾</span><span class="en">Console · turn knobs, hold the shield</span></p></div></div></div>
+<div class="trial"><div class="th"><b>5</b><span class="zh">星令传递</span><span class="en">Orders</span></div>
+ <div class="shots"><div class="col"><figure class="ph"><img src="assets/shots/ph-5-room.jpg" alt="" loading="lazy"></figure><figure class="ph"><img src="assets/shots/ph-5-trial.jpg" alt="" loading="lazy"></figure><p><span class="tag me"><span class="zh">旅人 · 手机</span><span class="en">WANDERER · PHONE</span></span><span class="zh">星令殿 · 摇曲柄，喊星名</span><span class="en">Order hall · crank, call the names</span></p></div>
+ <div class="col wide"><figure class="pc"><img src="assets/shots/hq-5.jpg" alt="" loading="lazy"></figure><p><span class="tag ai"><span class="zh">星象师 · 电脑</span><span class="en">STARGAZER · LAPTOP</span></span><span class="zh">星令台 · 听令拨星灯</span><span class="en">Order console · flip on command</span></p></div></div></div>
+<div class="trial"><div class="th"><b>6</b><span class="zh">祭仪</span><span class="en">Ritual</span></div>
+ <div class="shots"><div class="col"><figure class="ph"><img src="assets/shots/ph-6-room.jpg" alt="" loading="lazy"></figure><p><span class="tag me"><span class="zh">旅人 · 手机</span><span class="en">WANDERER · PHONE</span></span><span class="zh">祭坛 · 画圈、长按、摇铃、倾倒</span><span class="en">Altar · circle, hold, shake, pour</span></p></div>
+ <div class="col wide"><figure class="pc"><img src="assets/shots/hq-6.jpg" alt="" loading="lazy"></figure><p><span class="tag ai"><span class="zh">星象师 · 电脑</span><span class="en">STARGAZER · LAPTOP</span></span><span class="zh">祭仪卷轴 · 念步骤，按住吟唱</span><span class="en">Scroll · read steps, hold the chant</span></p></div></div></div>
+
 </div></section>
 
 <section id="refs"><div class="wrap">
   <h2><small>REFERENCES</small><span class="zh">参考图</span><span class="en">References</span></h2>
-  <div class="refs"><img src="assets/1.webp" alt="style reference 1" loading="lazy"><img src="assets/2.webp" alt="style reference 2" loading="lazy"><img src="assets/3.webp" alt="style reference 3" loading="lazy"><img src="assets/4.webp" alt="style reference 4" loading="lazy"><img src="assets/5.webp" alt="style reference 5" loading="lazy"></div>
-  <p class="sub zh" style="margin-top:10px">画风：深海军蓝 / 黑色菱形格、奶油色云、橙黄天蓝粉的圆点、四角星、蜡笔颗粒。</p>
-  <p class="sub en" style="margin-top:10px">Visual style: deep navy/black harlequin, cream clouds, orange/yellow/sky/pink dots, four-point stars, crayon grain.</p>
-  <div class="card" style="margin-top:14px"><table>
-    <tr><th><span class="zh">玩法参考</span><span class="en">GAMEPLAY</span></th><th><span class="zh">取了什么</span><span class="en">What I took</span></th></tr>
-    <tr><td>Keep Talking and Nobody Explodes</td><td><span class="zh">一人看得见、一人看手册，必须靠说话；限时压力</span><span class="en">One sees, one has the manual — talk to progress; timed pressure</span></td></tr>
-    <tr><td>We Were Here</td><td><span class="zh">两人在不同房间，各自拿着对方缺的信息</span><span class="en">Two players in separate rooms, each holding what the other lacks</span></td></tr>
-    <tr><td>Spaceteam</td><td><span class="zh">互相喊对方面板上的名字（第 5 关）</span><span class="en">Shouting names on each other’s panels (trial 5)</span></td></tr>
-    <tr><td>Operation: Tango</td><td><span class="zh">不对称的双人分工与实时配合</span><span class="en">Asymmetric roles with real-time coordination</span></td></tr>
-    <tr><td>Rusty Lake</td><td><span class="zh">只取点击探索 + 场景内小谜题的<b>操作方式</b>，不取画风</span><span class="en">Only the point-and-explore interaction and in-scene puzzles — <b>not</b> the art</span></td></tr>
-  </table></div>
+  <div class="refs"><img src="assets/1.webp" alt="" loading="lazy"><img src="assets/2.webp" alt="" loading="lazy"><img src="assets/3.webp" alt="" loading="lazy"><img src="assets/4.webp" alt="" loading="lazy"><img src="assets/5.webp" alt="" loading="lazy"></div>
+  <div class="chips"><span>Keep Talking and Nobody Explodes</span><span>We Were Here</span><span>Spaceteam</span><span>Operation: Tango</span><span class="hl">Rusty Lake <em class="zh">· 只取操作方式，不取画风</em><em class="en">· interaction only, not the art</em></span></div>
 </div></section>
 
 <section id="story"><div class="wrap">
-  <h2><small>STORY &amp; SETTING</small><span class="zh">剧情设定</span><span class="en">Story &amp; setting</span></h2>
-  <div class="story zh">
-    <p>很久以前，天空里有一扇门。</p><p>每个黎明它只开一次，让迷路的星星回家。</p>
-    <p class="hl">今夜，门被封死了。它的两位看守，被隔在门的两侧。</p>
-    <p>你是<b>星象师</b>：站在观星台，读得懂整片星空，却看不见门里发生了什么。</p>
-    <p>你是<b>旅人</b>：被困在星门厅里，看得见一切，却读不懂星图。</p>
-    <p class="hl">只有你们的声音，能穿过这道门。黎明将至。</p>
-  </div>
-  <div class="story en">
-    <p>Long ago, there was a gate in the sky.</p><p>Once each dawn it opened, to let lost stars find their way home.</p>
-    <p class="hl">Tonight, the gate is sealed. Its two keepers are parted on either side.</p>
-    <p>You are the <b>Stargazer</b>: from the observatory you can read the whole sky, but not what happens inside the gate.</p>
-    <p>You are the <b>Wanderer</b>: trapped in the gate hall, you see everything — but cannot read the stars.</p>
-    <p class="hl">Only your voices can cross the gate. Dawn is coming.</p>
-  </div>
-  <div class="grid3" style="margin-top:22px">
-    <div class="card"><h3 class="zh">一个世界，两个视角</h3><h3 class="en">One world, two views</h3><p class="zh">旅人的 6 个房间，对应星象师观星台上的 6 座台子，名字一一对应，屏幕上还会标出“旅人在此”。</p><p class="en">The Wanderer’s 6 rooms match the Stargazer’s 6 consoles by name, and a “Wanderer is here” marker shows where they are.</p></div>
-    <div class="card"><h3 class="zh">只有符号，没有名字</h3><h3 class="en">Symbols, no names</h3><p class="zh">星点和月相都只有图形，怎么称呼它们，由两个人当场商量。</p><p class="en">Stars and moon phases are shapes only — the two of you invent the words on the spot.</p></div>
-    <div class="card"><h3 class="zh">黎明倒计时</h3><h3 class="en">Dawn is the clock</h3><p class="zh">13 分钟，警报满 4 次也算失败；风暴和星令都有时限。</p><p class="en">13 minutes; 4 alarms also ends the run. Storms and orders are timed.</p></div>
-  </div>
+  <h2><small>STORY</small><span class="zh">剧情设定</span><span class="en">Story</span></h2>
+  <div class="story zh"><p>很久以前，天空里有一扇门。每个黎明它只开一次，让迷路的星星回家。</p><p class="hl">今夜，门被封死了。它的两位看守，被隔在门的两侧。</p><p>星象师读得懂星图，却看不见门里；旅人看得见一切，却读不懂星图。</p><p class="hl">只有你们的声音，能穿过这道门。</p></div>
+  <div class="story en"><p>Long ago, there was a gate in the sky. Once each dawn it opened, to let lost stars find their way home.</p><p class="hl">Tonight, the gate is sealed. Its two keepers are parted on either side.</p><p>The Stargazer reads the stars but cannot see inside; the Wanderer sees everything but cannot read them.</p><p class="hl">Only your voices can cross the gate.</p></div>
+  <div class="pair"><figure class="pc"><img src="assets/shots/hq-pano.jpg" alt="" loading="lazy"></figure><figure class="ph"><img src="assets/shots/ph-hall.jpg" alt="" loading="lazy"></figure></div>
+  <p class="cap zh">左：星象师的观星台（可拖拽 360°）　右：旅人的星门厅</p><p class="cap en">Left: the Stargazer’s observatory (drag 360°) · Right: the Wanderer’s gate hall</p>
 </div></section>
 
 <section id="process"><div class="wrap">
-  <h2><small>MADE WITH AI</small><span class="zh">我是怎么和 AI 一起做出来的</span><span class="en">How I made it with AI</span></h2>
-  <p class="sub zh">只放重点。<span class="tag me">我</span> = 我做的决定，<span class="tag ai">AI</span> = AI 做的执行。</p>
-  <p class="sub en">Highlights only. <span class="tag me">ME</span> = my decisions, <span class="tag ai">AI</span> = AI execution.</p>
-  <div class="steps">
-    <div class="step"><h3 class="zh">选题：先发散，再用约束砍掉</h3><h3 class="en">Pick the idea: diverge, then cut</h3>
-      <p class="zh"><span class="tag ai">AI</span>一轮轮给出方向；我连续否掉“不好玩”和“和现成工具没区别”的，又拿另一个模型的答案做对照。</p>
-      <p class="zh"><span class="tag me">我</span>最后留下双人合作 + 手机与电脑各看到不同信息：必须说话才能过关，“两个人”才有意义。</p>
-      <p class="en"><span class="tag ai">AI</span> proposed directions round after round; I rejected the ones that weren’t fun or duplicated existing tools, and cross-checked against another model.</p>
-      <p class="en"><span class="tag me">ME</span> I kept co-op with asymmetric info on phone and laptop: if you can’t pass without talking, two players actually matter.</p></div>
-    <div class="step"><h3 class="zh">给参考：只借“操作方式”，不借“画风”</h3><h3 class="en">References: borrow the interaction, not the art</h3>
-      <p class="zh"><span class="tag me">我</span>第一版出来后我纠正：“我只是让你模仿锈湖的<b>操作模式</b>，不要照搬画风。”然后给了上面 5 张抽象画风图。</p>
-      <p class="en"><span class="tag me">ME</span> After v1 I corrected it: “I only asked you to imitate Rusty Lake’s <b>interaction</b>, not its art.” Then I supplied the 5 style images above.</p></div>
-    <div class="step"><h3 class="zh">先过目，再开工：设计评审关卡</h3><h3 class="en">Review gate: mockups before code</h3>
-      <p class="zh"><span class="tag me">我</span>规定 AI 必须先出主页面和关卡内截图的设计稿，我点头后才改游戏。</p>
-      <p class="zh"><span class="tag ai">AI</span>产出 UI 概念稿；我否掉了“最终对照灯光”这类无聊环节，保留限时任务，并要求星象师不能一直停在一个页面——于是有了可拖拽 360° 的第一人称观星台。</p>
-      <p class="en"><span class="tag me">ME</span> AI had to show UI mockups (home + in-level) and get my approval before touching the game.</p>
-      <p class="en"><span class="tag ai">AI</span> produced the concepts; I cut the dull “light matching” finale, kept timed tasks, and asked that the Stargazer never sit on one screen — hence the first-person, drag-to-look 360° observatory.</p></div>
-    <div class="step"><h3 class="zh">三轮试玩，每轮都是具体的修改</h3><h3 class="en">Three playtest rounds, concrete fixes</h3>
-      <ul class="fix zh">
-        <li><b>第一轮：</b>完成一关后全景自己狂转 → 修 bug、取消自动旋转；去掉摄像头/二维码，改成手机上的祭坛手势；时间太紧 → 13 分钟、4 次警报；月相只给符号；手机一直在同一个场景 → 做成多房间探索。</li>
-        <li><b>第二轮：</b>提示挡住火种和月盘 → 挪到顶部并淡出；台子和房间同名并标出“旅人在此”；整体太亮、眼睛疼 → 压暗配色；加入程序生成的空灵背景音乐。</li>
-        <li><b>第三轮：</b>第五关怎么也玩不了 → 找到手机端轮盘没有可点击区域、计时在手机能操作前就开始，修掉；加入 21 秒开场过场。</li>
-      </ul>
-      <ul class="fix en">
-        <li><b>Round 1:</b> the panorama spun wildly after a trial → bug fixed, no auto-rotate; camera/QR replaced by altar gestures on the phone; timing too tight → 13 min, 4 alarms; moon phases symbols only; phone stuck in one scene → multi-room exploration.</li>
-        <li><b>Round 2:</b> hints covered the flame/moon → moved to the top and fading; consoles and rooms share names with a “Wanderer is here” marker; too bright → dimmed palette; added generated ambient music.</li>
-        <li><b>Round 3:</b> stage 5 unplayable → the phone dial had no tap area and timers started before the phone could act; fixed. Added a 21 s opening cutscene.</li>
-      </ul></div>
-    <div class="step"><h3 class="zh">让 AI 自己当测试员</h3><h3 class="en">AI as its own tester</h3>
-      <p class="zh"><span class="tag ai">AI</span>写了模拟“两个玩家”的脚本跑遍规则（警报、风暴、星令超时、祭仪），再用浏览器真实点击验证界面。</p>
-      <p class="zh">教训：脚本触发的事件会<b>掩盖</b>真实点击才暴露的 bug（面板每 0.2 秒重绘吞掉点击、按钮没有点击区），所以最后一定要真点。</p>
-      <p class="en"><span class="tag ai">AI</span> wrote scripts simulating both players to exercise every rule, then verified the UI with real browser clicks.</p>
-      <p class="en">Lesson: scripted events <b>hide</b> bugs only real clicks reveal (a panel re-rendering every 200 ms ate clicks; a button had no hit area).</p></div>
+  <h2><small>MADE WITH AI</small><span class="zh">和 AI 一起做</span><span class="en">Made with AI</span></h2>
+  <div class="flow">
+    <div><i>1</i><b class="zh">发散 → 砍</b><b class="en">Diverge → cut</b><span class="zh">AI 出方向，我否掉不好玩的</span><span class="en">AI proposes, I cut the dull</span></div>
+    <div><i>2</i><b class="zh">给参考</b><b class="en">Give references</b><span class="zh">玩法 + 5 张画风图</span><span class="en">gameplay + 5 style images</span></div>
+    <div><i>3</i><b class="zh">先过目</b><b class="en">Review first</b><span class="zh">设计稿通过才开工</span><span class="en">mockups approved before code</span></div>
+    <div><i>4</i><b class="zh">三轮试玩</b><b class="en">3 playtests</b><span class="zh">每轮改具体问题</span><span class="en">concrete fixes each round</span></div>
+    <div><i>5</i><b class="zh">AI 自测</b><b class="en">AI self-test</b><span class="zh">模拟双人 + 真实点击</span><span class="en">simulated players + real clicks</span></div>
   </div>
-  <p class="quote zh">已知局限：还没在真实手机上做完整试玩；手机陀螺仪需要 HTTPS，所以祭坛以触摸手势为主。</p>
-  <p class="quote en">Known limits: not yet fully playtested on a real phone; the gyroscope needs HTTPS, so the altar uses touch gestures first.</p>
-  <p><a class="btn" href="hq.html?demo" target="_blank" rel="noopener"><span class="zh">▶ 全屏试玩</span><span class="en">▶ Play full screen</span></a><a class="btn ghost" href="play.html"><span class="zh">如何双人游玩</span><span class="en">How to play with two</span></a><a class="btn ghost" href="https://github.com/Albedovo/gate-of-stars" target="_blank" rel="noopener">GitHub</a></p>
+  <div class="quote zh">“我只是让你模仿锈湖的<b>操作模式</b>，不要照搬画风。”——一句纠正，换来了现在的画风。</div>
+  <div class="quote en">“I only asked you to imitate Rusty Lake’s <b>interaction</b>, not its art.” — one correction that set the look.</div>
+  <div class="fixes">
+    <div><b class="zh">第一轮</b><b class="en">Round 1</b><span class="zh">全景乱转 · 时间太紧 · 去掉摄像头 · 手机多房间</span><span class="en">spinning panorama · too tight · camera removed · multi-room phone</span></div>
+    <div><b class="zh">第二轮</b><b class="en">Round 2</b><span class="zh">提示挡物 · 太亮 · 加音乐 · 台子房间同名</span><span class="en">hints covering objects · too bright · music · shared names</span></div>
+    <div><b class="zh">第三轮</b><b class="en">Round 3</b><span class="zh">第 5 关点不动 · 加 21 秒开场</span><span class="en">stage 5 unclickable · 21 s intro</span></div>
+  </div>
+  <p class="cap zh">已知局限：尚未在真实手机上完整试玩。</p><p class="cap en">Not yet fully playtested on a real phone.</p>
+  <p><a class="btn" href="hq.html?demo" target="_blank" rel="noopener"><span class="zh">▶ 全屏试玩</span><span class="en">▶ Play full screen</span></a><a class="btn ghost" href="play.html"><span class="zh">双人游玩</span><span class="en">Two-player setup</span></a><a class="btn ghost" href="https://github.com/Albedovo/gate-of-stars" target="_blank" rel="noopener">GitHub</a></p>
 </div></section>
 <footer>Gate of Stars</footer>
 <script>

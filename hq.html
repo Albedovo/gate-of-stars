@@ -460,6 +460,7 @@ function render(s) {
   document.addEventListener('langchange', () => { buildLayers(); if (S) { render(S); if (ui.focus !== null) { const k = ui.focus; closeFocus(); openFocus(k); } if (!$('#book').hidden) openBook(ui.tab); } });
   window.addEventListener('resize', applyX); ui.x = XK(0) - pano.clientWidth / 2;
   setInterval(tickTimer, 200);
+  { const q = new URLSearchParams(location.search); if (q.get('focus')) setTimeout(() => openFocus(+q.get('focus')), 900); }   // 截图用：?focus=3
 })();
 </script>
 </body>
