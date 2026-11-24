@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>星门 · UI 概念稿</title>
+<style>
+  body { margin: 0; background: #16161c; color: #e9e4d4; font-family: "PingFang SC", Futura, "Avenir Next", sans-serif; padding: 44px 36px 90px; }
+  h1 { font-weight: 800; letter-spacing: .25em; font-size: 30px; margin: 0 0 6px; }
+  .sub { color: #9a96a8; margin-bottom: 40px; font-size: 15px; }
+  .row { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 64px; }
+  figure { margin: 0; }
+  figcaption { margin-top: 16px; max-width: 360px; font-size: 14px; line-height: 1.75; color: #b9b4c8; }
+  figcaption b { display: block; color: #f3bd46; font-size: 16px; letter-spacing: .1em; margin-bottom: 4px; }
+  .phone { width: 360px; height: 740px; border-radius: 40px; overflow: hidden; box-shadow: 0 0 0 9px #07070b, 0 26px 60px #000a; }
+  .desk { width: 960px; height: 600px; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 9px #07070b, 0 26px 60px #000a; }
+  svg { display: block; }
+  .note { max-width: 980px; font-size: 15px; line-height: 1.9; background: #1f1f27; border-radius: 12px; padding: 22px 28px; }
+  .note h2 { font-size: 17px; letter-spacing: .15em; color: #f3bd46; margin: 18px 0 6px; } .note h2:first-child { margin-top: 0; }
+  .note li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <!-- 手绘边缘 -->
+  <filter id="rough" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+  <!-- 蜡笔 / 水粉颗粒：边缘抖动 + 表面留白 -->
+  <filter id="crayon" x="-3%" y="-3%" width="106%" height="106%">
+    <feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="6" result="d"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".34" numOctaves="2" seed="9" result="g"/>
+    <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  7 0 0 0 -.8" result="ga"/>
+    <feComposite in="d" in2="ga" operator="in"/>
+  </filter>
+</defs></svg>
+
+<h1>星门 · GATE OF STARS</h1>
+<div class="sub">UI 概念稿 v1 · 先看画风、布局和玩法示意，确认后再改游戏</div>
+
+<div class="row" id="r1"></div>
+<div class="row" id="r2"></div>
+
+<div class="note">
+  <h2>设定</h2>
+  <p>你们被困在"星门"的两侧。<b>旅人</b>（手机）在星门厅里摸索，<b>星象师</b>（电脑）坐在观星桌前读星图。必须在<b>黎明</b>之前把门打开——限时 6 分钟，用顶部的"黎明线"表示。</p>
+  <h2>保留的锈湖式操作</h2>
+  <ul><li>点开物件看细节（放大特写）</li><li>拿到道具，放进凹槽 / 机关</li><li>转动、拖拽、旋转的机械装置</li><li>隐藏的发光点（脉冲圈提示）</li></ul>
+  <h2>玩法改动（取代档案柜 / 颜色对灯）</h2>
+  <ul>
+    <li><b>① 描星</b>：旅人墙上有一幅亮着连线的星座，星象师桌上只有散落的星点，要按口述连出同样的线。</li>
+    <li><b>② 对称门</b>：旅人面前是半幅图案，星象师手里是另半幅，双方各自旋转菱形片，直到拼成完全对称。</li>
+    <li><b>③ 调频校准</b>（取代颜色对灯）：星象师转两个旋钮，旅人看着星门里的星漂移并反馈"偏右上了"；星要稳定 3 秒才算成功。旋钮和星的移动关系是反直觉的，必须靠对话摸索。</li>
+    <li><b>④ 星尘风暴</b>（限时）：校准期间风暴会把星推偏，星象师要按住"护盾"撑过去。</li>
+    <li><b>⑤ 星钥匙</b>：旅人把手机上的星钥匙举给摄像头验证（保留二维码）。</li>
+  </ul>
+</div>
+
+<script>
+const C = { ink: '#0a0a13', navy: '#14258f', blue: '#2e5fc6', sky: '#58a2dc', cream: '#f5eedd', peach: '#f6d7a3', yellow: '#f3bd46', orange: '#ef7c33', pink: '#e9a6b8' };
+let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+
+// ---------- 图形积木 ----------
+const star4 = (x, y, r, fill, w = .2) => `<path d="M${x} ${y - r}Q${x + r * w} ${y - r * w} ${x + r} ${y}Q${x + r * w} ${y + r * w} ${x} ${y + r}Q${x - r * w} ${y + r * w} ${x - r} ${y}Q${x - r * w} ${y - r * w} ${x} ${y - r}z" fill="${fill}"/>`;
+const diamond = (x, y, w, h, fill, extra = '') => `<path d="M${x} ${y - h / 2}L${x + w / 2} ${y}L${x} ${y + h / 2}L${x - w / 2} ${y}z" fill="${fill}" ${extra}/>`;
+const dot = (x, y, r, fill, extra = '') => `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" ${extra}/>`;
+const harlequin = (w, h, s, c1, c2) => { let o = `<rect width="${w}" height="${h}" fill="${c2}"/>`; for (let j = -1; j <= 2 * h / s + 1; j++) for (let i = -1; i <= 2 * w / s + 1; i++) if (((i + j) % 2 + 2) % 2 === 0 && ((i % 2) + 2) % 2 === 0) { const x = i * s / 2, y = j * s / 2; o += `<path d="M${x} ${y - s / 2}L${x + s / 2} ${y}L${x} ${y + s / 2}L${x - s / 2} ${y}z" fill="${c1}"/>`; } return o; };
+const wisp = (x, y, sx, sy, fill, op = 1) => `<path transform="translate(${x},${y}) scale(${sx},${sy})" d="M0 60C60 8 140 6 200 38C240 58 280 36 330 70C262 104 200 82 140 102C80 124 30 104 0 60z" fill="${fill}" opacity="${op}"/>`;
+const cloud = (x, y, s, fill) => `<path transform="translate(${x},${y}) scale(${s})" d="M0 120C-10 62 50 22 110 42C140 2 220 2 250 52C300 42 340 82 320 120C280 150 60 150 0 120z" fill="${fill}"/>`;
+const scatter = (n, w, h, fills, r0, r1, kind = 'dot') => { let o = ''; for (let i = 0; i < n; i++) { const x = rnd() * w, y = rnd() * h, r = r0 + rnd() * (r1 - r0), f = fills[Math.floor(rnd() * fills.length)]; o += kind === 'star' ? star4(x, y, r, f, .18) : dot(x, y, r, f); } return o; };
+const strokes = (list) => list.map(([x1, y1, x2, y2, w, c, o]) => `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${c}" stroke-width="${w}" opacity="${o}" stroke-linecap="round"/>`).join('');
+const txt = (x, y, s, t, fill, o = {}) => `<text x="${x}" y="${y}" font-size="${s}" fill="${fill}" text-anchor="${o.a || 'middle'}" font-weight="${o.w || 700}" letter-spacing="${o.ls || 0}" ${o.f === false ? '' : 'filter="url(#rough)"'} ${o.extra || ''}>${t}</text>`;
+const pill = (x, y, w, h, fill, stroke, sw = 3) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h / 2}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" filter="url(#rough)"/>`;
+const phone = svg => `<div class="phone"><svg viewBox="0 0 360 740" width="360" height="740">${svg}</svg></div>`;
+const FONT = `font-family="PingFang SC, Futura, Avenir Next, sans-serif"`;
+
+// ---------- 1 主页面 ----------
+function home() {
+  seed = 11;
+  return phone(`<g ${FONT}><g filter="url(#crayon)">${harlequin(360, 520, 92, C.ink, C.blue)}
+      ${strokes([[-20, 80, 380, 14, 44, C.ink, .55], [-20, 410, 380, 340, 34, C.ink, .5], [40, 200, 200, 120, 18, C.navy, .5]])}
+      <circle cx="180" cy="270" r="132" fill="none" stroke="${C.orange}" stroke-width="7"/><circle cx="180" cy="270" r="112" fill="none" stroke="${C.peach}" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>
+      ${wisp(-40, 40, 1.1, 1.1, C.cream)}${wisp(400, 360, -1.05, 1, C.cream)}${wisp(-40, 300, .9, .8, C.peach, .9)}
+      ${star4(180, 270, 140, C.cream, .11)}${dot(180, 270, 48, C.orange)}${dot(180, 270, 33, C.yellow)}${star4(180, 270, 64, '#fff7d8', .2)}
+      ${scatter(14, 360, 460, [C.orange, C.peach, C.yellow], 4, 11)}${scatter(5, 360, 420, [C.cream, C.yellow], 8, 15, 'star')}
+    </g>
+    <g filter="url(#crayon)"><path d="M0 470C34 436 78 446 118 468C158 436 222 436 262 464C300 442 340 454 360 470V740H0z" fill="${C.cream}"/>
+      <path d="M0 528C60 506 120 528 180 510C240 494 300 524 360 508V740H0z" fill="${C.peach}" opacity=".5"/></g>
+    ${pill(272, 18, 70, 28, 'none', C.cream, 2.5)}${txt(307, 38, 13, '中 / EN', C.cream)}
+    ${txt(180, 546, 66, '星门', C.navy, { w: 900 })}${txt(180, 574, 13, 'GATE OF STARS', C.ink, { ls: 7 })}
+    ${pill(56, 594, 248, 52, C.orange, C.ink, 3.5)}${txt(180, 627, 19, '进入星门 · ENTER', C.ink)}
+    ${pill(76, 658, 208, 38, 'none', C.navy, 3)}${txt(180, 683, 14, '玩法说明 · HOW TO PLAY', C.navy)}
+    ${dot(112, 722, 5, '#2f9e5f')}${txt(124, 727, 12, '星象师已就位 · Stargazer online', C.ink, { a: 'start', w: 600, f: false })}
+  </g>`);
+}
+
+// ---------- 2 现场探索 ----------
+function explore() {
+  seed = 23;
+  const band = (x, w) => `<rect x="${x}" y="90" width="${w}" height="380" fill="${C.ink}"/><rect x="${x + 4}" y="94" width="${w - 8}" height="120" fill="${C.blue}"/><rect x="${x + 4}" y="218" width="${w - 8}" height="110" fill="${C.orange}"/><rect x="${x + 4}" y="332" width="${w - 8}" height="134" fill="${C.yellow}"/>`;
+  return phone(`<g ${FONT}>
+    <rect width="360" height="740" fill="${C.ink}"/>
+    <g filter="url(#crayon)">
+      <rect y="64" width="360" height="410" fill="${C.navy}"/>${strokes([[0, 130, 360, 90, 40, C.ink, .45], [0, 400, 360, 440, 34, C.ink, .4]])}
+      ${diamond(180, 272, 312, 420, C.cream)}${diamond(180, 272, 260, 350, C.blue)}${diamond(180, 272, 206, 280, C.ink)}${diamond(180, 272, 140, 188, C.yellow)}
+      ${star4(180, 272, 76, C.orange, .17)}${dot(180, 272, 17, C.cream)}
+      ${band(-6, 52)}${band(314, 52)}
+      ${scatter(10, 360, 460, [C.orange, C.peach], 3, 7)}
+      <g>${harlequin(360, 270, 70, C.ink, C.blue).replace('<rect', '<rect transform="translate(0,470)"').replace(/<path /g, '<path transform="translate(0,470)" ')}</g>
+      ${strokes([[0, 640, 360, 590, 40, C.ink, .45]])}
+      ${wisp(-30, 440, 1.2, .7, C.cream, .95)}${wisp(390, 470, -1.1, .7, C.peach, .9)}
+    </g>
+    <!-- 热点提示：脉冲圈 -->
+    <g filter="url(#rough)">
+      <circle cx="180" cy="272" r="40" fill="none" stroke="${C.cream}" stroke-width="3" stroke-dasharray="5 7"/>
+      <circle cx="24" cy="320" r="22" fill="none" stroke="${C.cream}" stroke-width="3"/>${dot(24, 320, 6, C.cream)}
+      <circle cx="258" cy="572" r="26" fill="none" stroke="${C.yellow}" stroke-width="3" stroke-dasharray="4 6"/>${star4(258, 572, 14, C.yellow, .22)}
+    </g>
+    <!-- 顶部：黎明线 + 警报 -->
+    <rect width="360" height="66" fill="${C.ink}" opacity=".88"/>
+    ${txt(24, 28, 12, '距离黎明', C.peach, { a: 'start', w: 600, f: false })}${txt(24, 50, 20, '04:21', C.cream, { a: 'start', w: 800, f: false })}
+    <path d="M104 40H282" stroke="${C.cream}" stroke-width="3" stroke-linecap="round" opacity=".5"/><path d="M104 40H200" stroke="${C.orange}" stroke-width="5" stroke-linecap="round"/>
+    ${star4(200, 40, 15, C.yellow, .22)}${dot(282, 40, 7, C.cream)}
+    ${dot(312, 32, 8, C.orange)}${dot(332, 32, 8, 'none', 'stroke="#f6d7a3" stroke-width="2.5"')}${dot(322, 52, 8, 'none', 'stroke="#f6d7a3" stroke-width="2.5"')}
+    <!-- 导航箭头 -->
+    <path d="M30 380L8 402L30 424z" fill="${C.cream}" opacity=".9"/><path d="M330 380L352 402L330 424z" fill="${C.cream}" opacity=".9"/>
+    <!-- 旁白 -->
+    ${pill(46, 604, 268, 34, C.ink, C.cream, 2.5)}${txt(180, 627, 13, '门中央的星，像在呼吸。', C.cream, { w: 600, f: false })}
+    <!-- 道具栏 -->
+    <g filter="url(#crayon)"><rect x="18" y="654" width="324" height="70" rx="18" fill="${C.cream}"/></g>
+    ${[60, 130, 200, 270].map((x, i) => `${diamond(x, 689, 54, 54, i === 0 ? C.navy : 'none', `stroke="${C.navy}" stroke-width="3" ${i ? 'stroke-dasharray="5 5"' : ''}`)}`).join('')}${star4(60, 689, 18, C.yellow, .22)}
+  </g>`);
+}
+
+// ---------- 3 现场解谜特写：校准星门 ----------
+function puzzle() {
+  seed = 31;
+  const segs = [...Array(10)].map((_, i) => `<rect x="${58 + i * 25}" y="508" width="19" height="22" rx="3" fill="${i < 6 ? C.orange : 'none'}" stroke="${C.ink}" stroke-width="2.5"/>`).join('');
+  return phone(`<g ${FONT}>
+    <g filter="url(#crayon)">${harlequin(360, 740, 92, C.ink, C.navy)}</g><rect width="360" height="740" fill="${C.ink}" opacity=".55"/>
+    <g filter="url(#crayon)"><rect x="22" y="62" width="316" height="620" rx="22" fill="${C.cream}"/></g>
+    <rect x="22" y="62" width="316" height="620" rx="22" fill="none" stroke="${C.ink}" stroke-width="4" filter="url(#rough)"/>
+    ${txt(180, 112, 30, '校准星门', C.navy, { w: 900 })}${txt(180, 134, 11, 'ALIGN THE GATE', C.ink, { ls: 5, w: 600 })}
+    ${dot(312, 90, 16, 'none', `stroke="${C.ink}" stroke-width="3"`)}<path d="M305 83l14 14M319 83l-14 14" stroke="${C.ink}" stroke-width="3" stroke-linecap="round"/>
+    <g filter="url(#crayon)">
+      ${diamond(180, 318, 272, 330, C.navy)}${diamond(180, 318, 226, 272, C.blue)}${diamond(180, 318, 176, 214, C.ink)}
+      <circle cx="214" cy="292" r="40" fill="none" stroke="${C.orange}" stroke-width="6"/><circle cx="214" cy="292" r="52" fill="none" stroke="${C.peach}" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>${star4(194, 306, 40, C.peach, .18)}${star4(214, 292, 58, C.yellow, .17)}${dot(214, 292, 10, C.cream)}
+    </g>
+    <g stroke="${C.cream}" stroke-width="2.5" opacity=".9" filter="url(#rough)"><path d="M160 318H200M180 298V338"/><circle cx="180" cy="318" r="22" fill="none" stroke-dasharray="4 5"/></g>
+    ${txt(180, 500, 12, '信号强度 SIGNAL', C.navy, { w: 700, f: false })}${segs}
+    <g transform="translate(180,584)"><circle r="30" fill="none" stroke="${C.ink}" stroke-width="3" opacity=".25"/><path d="M0 -30A30 30 0 1 1 -28 11" fill="none" stroke="${C.orange}" stroke-width="7" stroke-linecap="round"/>${txt(0, 6, 15, '2.1s', C.navy, { w: 800, f: false })}</g>
+    ${txt(180, 645, 13, '把星的位置告诉星象师，', C.ink, { w: 600, f: false })}${txt(180, 663, 13, '让他转动旋钮，保持 3 秒。', C.ink, { w: 600, f: false })}
+  </g>`);
+}
+
+// ---------- 5 结局 ----------
+function ending() {
+  seed = 41;
+  return phone(`<g ${FONT}><rect width="360" height="740" fill="${C.sky}"/>
+    <g filter="url(#crayon)"><rect width="360" height="300" fill="${C.blue}"/><rect y="200" width="360" height="200" fill="${C.sky}"/><rect y="320" width="360" height="200" fill="${C.peach}"/>
+      <circle cx="180" cy="250" r="122" fill="none" stroke="${C.orange}" stroke-width="8"/><circle cx="180" cy="250" r="106" fill="none" stroke="${C.cream}" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/><circle cx="180" cy="250" r="92" fill="${C.yellow}"/>${star4(180, 250, 190, C.cream, .08)}${star4(180, 250, 120, '#fff4c8', .12)}
+      ${scatter(12, 360, 300, [C.cream, C.peach], 3, 8)}${scatter(4, 360, 220, [C.cream], 9, 16, 'star')}
+      ${cloud(-60, 360, 1.1, C.cream)}${cloud(150, 390, 1.0, C.cream)}${wisp(-30, 470, 1.4, .9, C.cream)}
+      <path d="M0 640L360 600V740H0z" fill="${C.ink}"/>${[...Array(12)].map((_, i) => `<path d="M${i * 34} 740l22 -130" stroke="${C.cream}" stroke-width="14" opacity=".9"/>`).join('')}
+    </g>
+    ${txt(180, 470, 64, '黎明', C.navy, { w: 900 })}${txt(180, 498, 12, 'DAWN HAS COME', C.ink, { ls: 6, w: 600 })}
+    <g filter="url(#crayon)"><rect x="40" y="520" width="280" height="86" rx="18" fill="${C.cream}"/></g>
+    ${txt(100, 556, 12, '用时', C.ink, { w: 600, f: false })}${txt(100, 584, 22, '04:12', C.navy, { w: 800, f: false })}
+    ${txt(180, 556, 12, '警报', C.ink, { w: 600, f: false })}${txt(180, 584, 22, '1', C.orange, { w: 800, f: false })}
+    ${txt(260, 556, 12, '最长稳定', C.ink, { w: 600, f: false })}${txt(260, 584, 22, '3.0s', C.navy, { w: 800, f: false })}
+    ${pill(70, 636, 220, 52, C.orange, C.ink, 3.5)}${txt(180, 669, 19, '再来一局 · AGAIN', C.ink)}
+  </g>`);
+}
+
+// ---------- 4 总部桌面 ----------
+function hq() {
+  seed = 53;
+  const knob = (cx, cy, r, ang, name, col) => `<g><circle cx="${cx}" cy="${cy}" r="${r + 8}" fill="${C.ink}"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="${C.cream}" stroke="${C.ink}" stroke-width="3"/>
+    ${[...Array(24)].map((_, i) => { const a = i * 15 * Math.PI / 180, l = i % 6 === 0 ? 11 : 6; return `<path d="M${cx + Math.sin(a) * (r + 1)} ${cy - Math.cos(a) * (r + 1)}L${cx + Math.sin(a) * (r + 1 + l)} ${cy - Math.cos(a) * (r + 1 + l)}" stroke="${C.peach}" stroke-width="2.5"/>`; }).join('')}
+    <circle cx="${cx}" cy="${cy}" r="${r - 14}" fill="${col}" opacity=".9"/>${star4(cx, cy, r - 10, C.cream, .22)}
+    <path d="M${cx} ${cy}L${cx + Math.sin(ang) * (r - 6)} ${cy - Math.cos(ang) * (r - 6)}" stroke="${C.ink}" stroke-width="6" stroke-linecap="round"/>${dot(cx, cy, 7, C.ink)}</g>
+    ${txt(cx, cy + r + 34, 16, name, C.cream, { w: 800, f: false })}`;
+  // 星图：7 个星点，前 4 个已连线
+  const pts = [[430, 196], [548, 232], [512, 340], [420, 380], [352, 292], [596, 400], [480, 448]].map(([x, y]) => [Math.round(478 + (x - 478) * .84), Math.round(318 + (y - 320) * .84)]);
+  const line = pts.slice(0, 4).map(p => p.join(' ')).join('L');
+  return `<div class="desk"><svg viewBox="0 0 960 600" width="960" height="600" ${FONT}>
+    <g filter="url(#crayon)">${harlequin(960, 600, 100, '#0a0a16', '#13237f')}</g><rect width="960" height="600" fill="${C.ink}" opacity=".5"/>
+    <!-- 顶栏 -->
+    <rect width="960" height="58" fill="${C.ink}" opacity=".9"/>
+    ${txt(28, 36, 17, '星象师 · STARGAZER', C.cream, { a: 'start', w: 800, f: false, ls: 1 })}
+    ${txt(388, 34, 12, '距离黎明', C.peach, { a: 'end', w: 600, f: false })}
+    <path d="M404 30H700" stroke="${C.cream}" stroke-width="3" opacity=".45" stroke-linecap="round"/><path d="M404 30H588" stroke="${C.orange}" stroke-width="6" stroke-linecap="round"/>${star4(588, 30, 16, C.yellow, .22)}${dot(700, 30, 8, C.cream)}
+    ${txt(724, 36, 20, '03:48', C.cream, { a: 'start', w: 800, f: false })}
+    ${dot(836, 29, 9, C.orange)}${dot(860, 29, 9, 'none', 'stroke="#f6d7a3" stroke-width="2.5"')}${dot(884, 29, 9, 'none', 'stroke="#f6d7a3" stroke-width="2.5"')}
+    ${pill(902, 14, 44, 28, 'none', C.cream, 2.5)}${txt(924, 33, 12, 'EN', C.cream, { f: false })}
+
+    <!-- 左：旅人所在 + 便笺 -->
+    <g filter="url(#crayon)"><rect x="24" y="80" width="262" height="496" rx="16" fill="${C.cream}"/></g>
+    ${txt(46, 114, 14, '旅人所在 · WANDERER', C.navy, { a: 'start', w: 800, f: false, ls: 1 })}
+    ${diamond(78, 176, 64, 82, 'none', `stroke="${C.navy}" stroke-width="3"`)}${diamond(155, 176, 64, 82, C.orange, `stroke="${C.ink}" stroke-width="3"`)}${diamond(232, 176, 64, 82, 'none', `stroke="${C.navy}" stroke-width="3"`)}
+    ${dot(155, 176, 9, C.ink)}<circle cx="155" cy="176" r="18" fill="none" stroke="${C.ink}" stroke-width="2.5" stroke-dasharray="3 5"/>
+    ${txt(155, 236, 12, '星门厅中央', C.navy, { f: false, w: 600 })}
+    <path d="M46 262H264" stroke="${C.navy}" stroke-width="2" opacity=".3" stroke-dasharray="4 6"/>
+    ${txt(46, 292, 13, '笔记 · NOTES', C.navy, { a: 'start', w: 800, f: false, ls: 1 })}
+    ${['00:41  旅人进入星门厅', '01:20  左柱上有一道刻痕', '02:05  对称门已拼合 ✓', '03:12  描星：已连 4 / 7'].map((s, i) => `<text x="46" y="${326 + i * 30}" font-size="13.5" fill="${C.ink}" font-weight="600" style="font-style:italic">${s}</text>`).join('')}
+    <g transform="translate(46,462)">${star4(14, 30, 22, C.yellow, .22)}${star4(66, 52, 14, C.orange, .22)}${dot(110, 22, 8, C.blue)}${dot(150, 54, 5, C.orange)}${star4(196, 26, 12, C.navy, .22)}</g>
+
+    <!-- 中：星图桌（描星） -->
+    <g filter="url(#crayon)"><circle cx="478" cy="318" r="198" fill="${C.cream}"/><circle cx="478" cy="318" r="166" fill="none" stroke="${C.navy}" stroke-width="3"/><circle cx="478" cy="318" r="130" fill="none" stroke="${C.blue}" stroke-width="2" stroke-dasharray="3 8"/></g>
+    ${[...Array(36)].map((_, i) => { const a = i * 10 * Math.PI / 180, l = i % 3 === 0 ? 14 : 7; return `<path d="M${478 + Math.sin(a) * 166} ${318 - Math.cos(a) * 166}L${478 + Math.sin(a) * (166 - l)} ${318 - Math.cos(a) * (166 - l)}" stroke="${C.navy}" stroke-width="2.5"/>`; }).join('')}
+    ${pill(358, 104, 240, 30, C.ink, C.cream, 2.5)}${txt(478, 125, 13, '描星 · TRACE THE STARS', C.cream, { w: 800, f: false, ls: 1 })}
+    <g transform="translate(0,0)" filter="url(#rough)"><path d="M${line}" fill="none" stroke="${C.orange}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M${pts[3].join(' ')}L${pts[4].join(' ')}" stroke="${C.orange}" stroke-width="4" stroke-dasharray="3 10" stroke-linecap="round" fill="none"/></g>
+    ${pts.map(([x, y], i) => star4(x, y, i === 0 ? 26 : i % 2 ? 20 : 16, i < 4 ? C.orange : C.yellow, .2) + dot(x, y, 4, C.ink)).join('')}
+    ${pill(378, 500, 200, 32, C.navy, C.ink, 3)}${txt(478, 522, 13, '已连 4 / 7 · 听旅人描述', C.cream, { f: false, w: 700 })}
+    ${pill(408, 550, 140, 30, 'none', C.cream, 2.5)}${txt(478, 570, 12, '↺ 擦掉重连', C.cream, { f: false, w: 700 })}
+
+    <!-- 右：调频旋钮 -->
+    <g filter="url(#crayon)"><rect x="672" y="80" width="264" height="262" rx="16" fill="${C.ink}" stroke="${C.cream}" stroke-width="3"/></g>
+    ${txt(694, 112, 13, '调频校准 · TUNING', C.peach, { a: 'start', w: 800, f: false, ls: 1 })}
+    ${knob(752, 218, 46, 0.9, 'α', C.blue)}${knob(858, 218, 46, -1.9, 'β', C.orange)}
+    <path d="M694 140q14-18 28 0t28 0t28 0t28 0t28 0t28 0t28 0" fill="none" stroke="${C.yellow}" stroke-width="3" opacity=".8"/>
+
+    <!-- 右：护盾 -->
+    <g filter="url(#crayon)"><rect x="672" y="356" width="264" height="104" rx="16" fill="${C.orange}"/></g>
+    ${txt(694, 384, 12, '星尘风暴 · 剩 12 秒', C.ink, { a: 'start', w: 800, f: false })}
+    ${pill(694, 396, 220, 42, C.ink, C.ink, 2)}${txt(804, 424, 17, '按住护盾 · HOLD', C.cream, { f: false, w: 800, ls: 1 })}
+    <rect x="700" y="444" width="140" height="6" rx="3" fill="${C.ink}"/>
+
+    <!-- 右：星图册 -->
+    <g filter="url(#crayon)"><rect x="672" y="474" width="264" height="102" rx="16" fill="${C.cream}"/></g>
+    ${['一', '二', '三', '四'].map((s, i) => `${pill(690 + i * 56, 484, 48, 24, i === 1 ? C.navy : 'none', C.navy, 2)}${txt(714 + i * 56, 501, 13, s, i === 1 ? C.cream : C.navy, { f: false })}`).join('')}
+    <g transform="translate(690,520)">${[0, 1, 2, 3].map(i => `${diamond(22 + i * 58, 20, 36, 40, i % 2 ? C.orange : C.blue, `stroke="${C.ink}" stroke-width="2.5"`)}${txt(22 + i * 58, 56, 13, ['▲', '●', '■', '◆'][i] + '=' + [3, 1, 4, 7][i], C.ink, { f: false, w: 800 })}`).join('')}</g>
+  </svg></div>`;
+}
+
+const cap = (t, d) => `<figcaption><b>${t}</b>${d}</figcaption>`;
+document.getElementById('r1').innerHTML =
+  `<figure>${home()}${cap('① 主页面（手机）', '上半是深蓝黑菱形格 + 发光的四角星，下半是奶油色云团托住标题和按钮。大面积留白保证文字清晰。')}</figure>` +
+  `<figure>${explore()}${cap('② 现场 · 探索', '对称的星门厅。脉冲圈标出能点的地方；顶部是"黎明线"（计时）和警报点；底部是道具栏，菱形凹槽。')}</figure>` +
+  `<figure>${puzzle()}${cap('③ 现场 · 解谜特写（校准星门）', '点开门中央的星进入。星会漂移，旅人把位置告诉星象师，星象师转旋钮，星稳定 3 秒才算成功。')}</figure>`;
+document.getElementById('r2').innerHTML =
+  `<figure>${hq()}${cap('④ 总部 · 星象师桌面（电脑）', '左：旅人所在位置 + 手写笔记；中：星图桌，按旅人口述把星点连成线；右：调频旋钮、按住护盾、星图册。不再有"翻表查颜色"，改成有手感的操作。')}</figure>` +
+  `<figure>${ending()}${cap('⑤ 结局（两边同步）', '黎明升起。显示用时、警报次数和最长稳定时间。')}</figure>`;
+</script>
+</body>
+</html>

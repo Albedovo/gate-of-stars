@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>星门 · 星象师 / Gate of Stars · Stargazer</title>
+<style>
+  :root { --ink: #06060e; --navy: #0c1658; --blue: #1b3380; --sky: #4a7db0; --cream: #e8dfc7; --peach: #d9bd8a; --yellow: #eeb23a; --orange: #dc6b2c; --pink: #d397a9; --paper: #c9bea1; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--ink); color: var(--cream); font-family: "PingFang SC", Futura, "Avenir Next", "Noto Sans SC", sans-serif; overflow: hidden; }
+  button { font: inherit; cursor: pointer; }
+  body { display: flex; flex-direction: column; }
+  .pill { border: 2.5px solid var(--cream); background: transparent; color: var(--cream); border-radius: 18px; padding: 3px 12px; font-size: 12px; font-weight: 800; }
+  .btn { padding: 11px 26px; border-radius: 28px; border: 3.5px solid var(--ink); background: var(--orange); color: var(--ink); font-weight: 800; font-size: 16px; box-shadow: 0 4px 0 #0006; }
+  .btn.ghost { background: transparent; border-color: var(--navy); color: var(--navy); box-shadow: none; padding: 7px 18px; font-size: 13px; }
+  .btn:disabled { opacity: .5; }
+
+  #top { flex: none; height: 56px; display: flex; align-items: center; gap: 18px; padding: 0 20px; background: #0a0a13; border-bottom: 3px solid #14258f; z-index: 5; }
+  #top h1 { margin: 0; font-size: 16px; letter-spacing: .2em; white-space: nowrap; }
+  #dawn { flex: 1; display: flex; align-items: center; gap: 14px; max-width: 620px; margin: 0 auto; }
+  #dawn small { font-size: 11px; color: var(--peach); font-weight: 700; white-space: nowrap; } #tm { font-size: 22px; font-weight: 900; min-width: 64px; }
+  #track { position: relative; flex: 1; height: 5px; border-radius: 3px; background: #f5eedd44; } #fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--orange); border-radius: 3px; } #sun { position: absolute; top: -10px; width: 24px; height: 24px; margin-left: -12px; }
+  #dots i { display: inline-block; width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid var(--peach); margin-right: 6px; } #dots i.on { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 12px var(--orange); }
+  #conn { width: 9px; height: 9px; border-radius: 50%; background: #c33; display: inline-block; } #conn.on { background: #3c9; }
+
+  #compass { flex: none; height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; background: #0e1030; border-bottom: 2px solid #1b2a8a; z-index: 5; }
+  .chip { display: flex; align-items: center; gap: 7px; padding: 4px 12px 4px 5px; border-radius: 20px; border: 2.5px solid #f5eedd55; background: transparent; color: var(--cream); font-size: 13px; font-weight: 700; }
+  .chip i { width: 24px; height: 24px; display: grid; place-items: center; font-style: normal; font-size: 12px; font-weight: 900; background: var(--cream); color: var(--ink); transform: rotate(45deg); border-radius: 4px; } .chip i b { transform: rotate(-45deg); }
+  .chip.here { border-color: var(--cream); background: #f5eedd22; } .chip.act { border-color: var(--yellow); animation: chipPulse 1.3s infinite; } .chip.done i { background: var(--yellow); } .chip.lock { opacity: .45; }
+  @keyframes chipPulse { 50% { box-shadow: 0 0 0 6px #f3bd4633; } }
+
+  #pano { position: relative; flex: 1; min-height: 380px; overflow: hidden; background: #0a0a1c; cursor: grab; touch-action: none; user-select: none; }
+  #pano.drag { cursor: grabbing; }
+  .layer { position: absolute; left: 0; bottom: 0; will-change: transform; pointer-events: none; } .layer svg { display: block; } #L2 { pointer-events: auto; }
+  #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 55%, #0000 42%, #06060ed0 100%), linear-gradient(#06060e88, #06060e20 38%, #06060e90); z-index: 3; }
+  #rail { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; width: 100%; z-index: 4; pointer-events: none; }
+  #azim { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 5; font-size: 12px; font-weight: 800; letter-spacing: .15em; color: var(--ink); pointer-events: none; }
+  #hint { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 5; background: var(--ink); border: 3px solid var(--cream); border-radius: 22px; padding: 7px 20px; font-weight: 800; font-size: 14px; white-space: nowrap; }
+  #hint b { color: var(--yellow); }
+  .edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: 6; display: none; align-items: center; gap: 8px; padding: 10px 16px; background: var(--ink); border: 3px solid var(--yellow); border-radius: 24px; font-weight: 800; cursor: pointer; animation: chipPulse 1.3s infinite; } #arrL { left: 14px; } #arrR { right: 14px; }
+  #toast { position: absolute; left: 50%; bottom: 78px; transform: translateX(-50%) translateY(8px); z-index: 12; background: var(--ink); border: 3px solid var(--cream); border-radius: 22px; padding: 9px 20px; font-weight: 700; opacity: 0; transition: .25s; pointer-events: none; white-space: nowrap; } #toast.on { opacity: 1; transform: translateX(-50%); }
+  .feed { margin-top: 10px; font-size: 13px; font-weight: 700; line-height: 1.7; color: var(--navy); } .feed div { border-left: 4px solid var(--orange); padding-left: 8px; margin: 3px 0; }
+  .scroll { background: #bcae86; border: 4px solid var(--ink); border-radius: 14px; padding: 12px 16px; width: 440px; max-width: 100%; box-shadow: inset 0 0 22px #8a6a3a55; } .scroll .row { display: flex; align-items: center; gap: 12px; padding: 9px 6px; border-bottom: 2px dashed #8a6a3a66; font-weight: 800; font-size: 15px; } .scroll .row:last-child { border: 0; } .scroll .row.cur { background: #f3bd4655; border-radius: 10px; } .scroll .row.done { opacity: .45; text-decoration: line-through; }
+  .pill.off { opacity: .4; text-decoration: line-through; }
+  .st .halo { opacity: 0; transition: opacity .8s; } .st.on .halo { opacity: 1; } .st .here { opacity: 0; } .st.at .here { opacity: 1; animation: gl 1.6s infinite; }
+  .chip small { display: block; font-size: 10px; color: var(--peach); font-weight: 600; line-height: 1.1; }
+  .st .glow { opacity: 0; } .st.on .glow { opacity: 1; animation: gl 1.3s infinite; } .st .badge { opacity: 0; } .st.done .badge { opacity: 1; } .st.locked { opacity: .4; }
+  @keyframes gl { 50% { opacity: .25; } }
+  #pano.storm::after, body.alarming::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 40; background: radial-gradient(circle, #0000 45%, #ef4a2acc 100%); animation: gl 1s infinite; }
+  body.shake #pano { animation: shake .35s; } @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  #foot { flex: none; height: 74px; display: flex; align-items: center; gap: 18px; padding: 0 20px; background: #0a0a13; border-top: 3px solid #14258f; z-index: 5; }
+  #loc { display: flex; align-items: center; gap: 10px; min-width: 210px; font-size: 13px; font-weight: 700; } #loc small { display: block; color: var(--peach); font-size: 11px; }
+  #notes { flex: 1; font-size: 13px; line-height: 1.5; color: var(--peach); font-weight: 600; overflow: hidden; max-height: 58px; } #notes div { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } #notes div:first-child { color: var(--cream); }
+
+  /* 特写视图 */
+  #focus { position: absolute; inset: 0; z-index: 8; background: #0a0a13e0; display: grid; place-items: center; padding: 18px; overflow: auto; }
+  #focus[hidden] { display: none; }
+  .fcard { position: relative; width: 100%; max-width: 940px; max-height: 100%; overflow: auto; background-color: var(--paper); color: var(--ink); border: 4px solid var(--ink); border-radius: 24px; padding: 18px 24px 22px;
+           background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .2 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>"); }
+  .fhead { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; } .fhead h2 { margin: 0; font-size: 28px; color: var(--navy); font-weight: 900; } .fhead .en { font-size: 11px; letter-spacing: 4px; font-weight: 700; }
+  .fhead .back { margin-left: auto; } .fbody { display: flex; gap: 26px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .side { flex: 1; min-width: 240px; max-width: 320px; font-size: 14px; font-weight: 600; line-height: 1.7; } .side .big { font-size: 22px; font-weight: 900; color: var(--navy); }
+  .rrow { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-weight: 800; font-size: 15px; } .rrow span { flex: 1; } .rrow button { width: 48px; padding: 7px 0; border-radius: 12px; border: 3px solid var(--ink); background: var(--cream); color: var(--ink); font-weight: 900; }
+  .msg { font-size: 13px; line-height: 1.7; font-weight: 600; }
+  .lamp { padding: 14px 8px; border-radius: 18px; border: 3.5px solid var(--ink); background: var(--ink); color: var(--cream); font-weight: 800; font-size: 16px; box-shadow: 0 4px 0 #0005; min-width: 120px; }
+  .lamp.on { background: var(--yellow); color: var(--ink); box-shadow: 0 0 20px var(--yellow); }
+  .scanbox { position: relative; width: 440px; max-width: 100%; aspect-ratio: 4/3; background: #000; border: 5px solid var(--ink); border-radius: 18px; overflow: hidden; } .scanbox video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+  .reticle { position: absolute; inset: 20%; border: 3px solid #6fd08acc; border-radius: 12px; pointer-events: none; }
+  .tab { display: inline-block; margin: 0 4px 8px 0; padding: 4px 12px; border-radius: 16px; border: 2.5px solid var(--navy); color: var(--navy); font-size: 13px; font-weight: 800; cursor: pointer; } .tab.on { background: var(--navy); color: var(--cream); }
+  .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: #0a0a13e6; } .modal[hidden] { display: none; }
+  #lobby, #end { background: var(--ink); padding: 0 0 26px; place-items: end center; } #lobby svg, #end svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .center { position: relative; z-index: 2; text-align: center; padding: 0 20px; } .center .stat { font-size: 13px; font-weight: 700; margin-top: 14px; color: var(--ink); } .center .stat i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: #c33; } .center .stat i.on { background: #2f9e5f; }
+  .dev { margin-top: 10px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="top"><h1 id="ttl"></h1><div id="dawn"><div><small id="tmL"></small><div id="tm">08:00</div></div><div id="track"><div id="fill"></div><svg id="sun" viewBox="-12 -12 24 24"></svg></div></div><div id="dots"></div><span><span id="conn"></span> <button class="pill" id="mus">♪</button> <button class="pill" id="lang"></button></span></div>
+<div id="compass"></div>
+<div id="pano">
+  <div class="layer" id="L0"></div><div class="layer" id="L1"></div><div class="layer" id="L2"></div>
+  <div id="vig"></div><svg id="rail" viewBox="0 0 1600 64" preserveAspectRatio="none"></svg><div id="azim"></div><div id="hint"></div><div class="edge" id="arrL"></div><div class="edge" id="arrR"></div><div id="toast"></div>
+  <div id="focus" hidden></div>
+</div>
+<div id="foot"><div id="loc"></div><div id="notes"></div><button class="pill" id="bookBtn"></button></div>
+<div class="modal" id="book" hidden></div>
+<div class="modal" id="lobby"></div>
+<div class="modal" id="end" hidden></div>
+
+<script src="net.js"></script>
+<script src="kit.js"></script>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const K = KIT, C = K.C, N = K.N, params = new URLSearchParams(location.search);
+const fmt = s => { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+const SW = 1800, XK = k => 150 + 300 * k;
+let cfg, S = null;
+const ui = { x: 0, v: 0, goal: null, drag: null, moved: false, focus: null, tab: 0, lastStage: -1, lastAlarm: 0, lastPhase: '', cam: false, scanning: false, cool: 0, introEl: null, fsig: null, seenT: null, chanting: false, cb: null, tt: null, knob: { a: .5, b: .5 }, holding: false, dragKnob: null, lastKnobSend: 0, hb: null };
+const LOCN = () => ({ hall: L('星门厅', 'Gate hall'), gallery: L('星座廊', 'Gallery'), mirror: L('镜厅', 'Mirror Hall'), moon: L('月室', 'Moon Chamber'), star: L('星门中心', 'At the Gate'), orders: L('星令殿', 'Order Hall'), altar: L('祭坛', 'Altar') });
+
+// ======================= 全景：三层视差 =======================
+function skyContent() { K.reseed(5); return `${K.harlequin(600, 560, 150, '#05050d', '#0a1245')}${K.scatter(30, 600, 400, [C.cream, C.yellow, C.peach], 1.4, 3.6)}${K.scatter(8, 600, 380, [C.cream, C.yellow], 6, 12, 'star')}${K.wisp(30, 380, .9, .55, C.cream, .16)}`; }
+function midContent() {
+  K.reseed(9);
+  const planet = (x, y, r, c1, c2, ring) => `<g>${ring ? `<ellipse cx="${x}" cy="${y}" rx="${r * 1.7}" ry="${r * .3}" fill="none" stroke="${C.cream}" stroke-width="6" transform="rotate(-18 ${x} ${y})"/>` : ''}<circle cx="${x}" cy="${y}" r="${r}" fill="${c1}"/><path d="M${x - r} ${y - r * .2}Q${x} ${y - r * .55} ${x + r} ${y - r * .2}" fill="none" stroke="${c2}" stroke-width="${r * .2}" opacity=".9"/><path d="M${x - r * .9} ${y + r * .35}Q${x} ${y + r * .05} ${x + r * .9} ${y + r * .35}" fill="none" stroke="${c2}" stroke-width="${r * .12}" opacity=".8"/>${ring ? `<path d="M${x - r * 1.7} ${y + r * .1}Q${x} ${y + r * .55} ${x + r * 1.7} ${y - r * .1}" fill="none" stroke="${C.cream}" stroke-width="6" transform="rotate(-18 ${x} ${y})" opacity=".0"/>` : ''}</g>`;
+  return `<g filter="url(#crayon)" opacity=".74">
+    <ellipse cx="540" cy="250" rx="500" ry="120" fill="none" stroke="${C.cream}" stroke-width="3" stroke-dasharray="3 12" opacity=".5" stroke-linecap="round"/>
+    <ellipse cx="540" cy="230" rx="440" ry="170" fill="none" stroke="${C.peach}" stroke-width="3" stroke-dasharray="3 12" opacity=".4" transform="rotate(14 540 230)" stroke-linecap="round"/>
+    ${planet(210, 190, 88, C.orange, C.yellow, true)}${planet(640, 120, 52, C.sky, C.cream, false)}${planet(900, 250, 68, C.peach, C.orange, true)}
+    ${K.dot(420, 330, 14, C.yellow)}${K.dot(760, 340, 10, C.cream)}${K.dot(120, 330, 9, C.pink)}${K.star4(500, 90, 22, C.yellow, .2)}${K.star4(1000, 120, 16, C.cream, .2)}${K.star4(350, 140, 12, C.peach, .2)}
+    ${K.wisp(-20, 400, 1.3, .7, C.dust, .4)}${K.wisp(560, 430, 1.1, .6, C.blue, .45)}</g>`;
+}
+function fgContent() {
+  K.reseed(21);
+  const floor = `<g filter="url(#crayon)">${K.harlequin(SW, 100, 64, C.ink, C.blue).replace('<rect', '<rect transform="translate(0,466)"').replace(/<path /g, '<path transform="translate(0,466)" ')}<rect y="460" width="${SW}" height="12" fill="${C.dust}"/></g>`;
+  const pillars = [...Array(6)].map((_, k) => { const x = 300 * k; return `<g filter="url(#crayon)"><rect x="${x - 15}" y="110" width="30" height="356" fill="${C.ink}"/><rect x="${x - 11}" y="114" width="22" height="80" fill="${C.blue}"/><rect x="${x - 11}" y="198" width="22" height="80" fill="${C.orange}"/><rect x="${x - 11}" y="282" width="22" height="80" fill="${C.yellow}"/><rect x="${x - 11}" y="366" width="22" height="96" fill="${C.sky}"/>${K.star4(x, 96, 26, C.yellow, .22)}</g>`; }).join('');
+  const lanterns = [75, 225, 375, 525, 675, 825, 975, 1125, 1275, 1425, 1575, 1725].map((x, i) => `<path d="M${x} 0V${50 + (i % 3) * 22}" stroke="${C.cream}" stroke-width="2.5" opacity=".7"/>${K.star4(x, 62 + (i % 3) * 22, 11 + (i % 2) * 4, [C.yellow, C.peach, C.orange][i % 3], .22)}`).join('');
+  const st = k => {
+    const cx = XK(k), nm = `${k + 1} · ${N.stage(k + 1)}`;
+    const art = [
+      `<rect x="${cx - 16}" y="360" width="32" height="104" fill="${C.cream}" stroke="${C.ink}" stroke-width="4"/><ellipse cx="${cx}" cy="352" rx="104" ry="26" fill="${C.cream}" stroke="${C.ink}" stroke-width="4"/><ellipse cx="${cx}" cy="352" rx="82" ry="19" fill="${C.navy}"/>
+       <path d="M${cx - 52} 346L${cx - 12} 336L${cx + 26} 350L${cx + 58} 334" fill="none" stroke="${C.orange}" stroke-width="4" stroke-linejoin="round"/>${[[-52, 346], [-12, 336], [26, 350], [58, 334]].map(([dx, dy]) => K.star4(cx + dx, dy, 11, C.yellow, .22)).join('')}${K.star4(cx, 274, 34, C.yellow, .2, `stroke="${C.ink}" stroke-width="3"`)}${K.dot(cx, 274, 6, C.cream)}`,
+      `<rect x="${cx - 100}" y="250" width="60" height="214" fill="${C.navy}" stroke="${C.cream}" stroke-width="4"/><rect x="${cx + 40}" y="250" width="60" height="214" fill="${C.navy}" stroke="${C.cream}" stroke-width="4"/>${K.diamond(cx - 70, 305, 40, 46, C.orange, `stroke="${C.ink}" stroke-width="3"`)}${K.diamond(cx - 70, 380, 40, 46, C.yellow, `stroke="${C.ink}" stroke-width="3"`)}${K.diamond(cx + 70, 305, 40, 46, C.sky, `stroke="${C.ink}" stroke-width="3"`)}${K.diamond(cx + 70, 380, 40, 46, C.pink, `stroke="${C.ink}" stroke-width="3"`)}<path d="M${cx} 250V464" stroke="${C.cream}" stroke-width="3" stroke-dasharray="4 9"/>${K.star4(cx, 270, 22, C.yellow, .22)}`,
+      `<path d="M${cx - 56} 464L${cx - 6} 372M${cx + 56} 464L${cx + 6} 372M${cx} 464V376" stroke="${C.cream}" stroke-width="6" stroke-linecap="round"/><ellipse cx="${cx}" cy="318" rx="100" ry="30" fill="none" stroke="${C.orange}" stroke-width="9" transform="rotate(-20 ${cx} 318)"/><ellipse cx="${cx}" cy="318" rx="76" ry="26" fill="none" stroke="${C.sky}" stroke-width="9" transform="rotate(28 ${cx} 318)"/><ellipse cx="${cx}" cy="318" rx="54" ry="20" fill="none" stroke="${C.yellow}" stroke-width="9" transform="rotate(-72 ${cx} 318)"/>${K.star4(cx, 318, 30, C.cream, .22, `stroke="${C.ink}" stroke-width="3"`)}${K.dot(cx, 318, 8, C.orange)}`,
+      `<path d="M${cx - 104} 464L${cx - 86} 376H${cx + 86}L${cx + 104} 464z" fill="${C.ink}" stroke="${C.cream}" stroke-width="4"/><rect x="${cx - 96}" y="362" width="192" height="22" fill="${C.cream}" stroke="${C.ink}" stroke-width="4"/>${[-40, 12].map(d => `<circle cx="${cx + d}" cy="344" r="24" fill="${C.cream}" stroke="${C.ink}" stroke-width="4"/><path d="M${cx + d} 344L${cx + d + 11} 330" stroke="${C.orange}" stroke-width="5" stroke-linecap="round"/>`).join('')}<rect x="${cx + 62}" y="314" width="12" height="52" rx="5" fill="${C.orange}" stroke="${C.ink}" stroke-width="3" transform="rotate(14 ${cx + 68} 366)"/><path d="M${cx - 74} 300q40 -50 80 0z" fill="${C.sky}" stroke="${C.ink}" stroke-width="4"/><path d="M${cx - 34} 300V330" stroke="${C.cream}" stroke-width="4"/>${K.star4(cx - 34, 270, 14, C.yellow, .22)}`,
+      `<rect x="${cx - 14}" y="400" width="28" height="64" fill="${C.cream}" stroke="${C.ink}" stroke-width="4"/><rect x="${cx - 88}" y="250" width="176" height="150" rx="16" fill="${C.navy}" stroke="${C.cream}" stroke-width="5"/>${[[-40, 296, C.orange], [40, 296, C.yellow], [-40, 356, C.sky], [40, 356, C.pink]].map(([dx, dy, c]) => `<circle cx="${cx + dx}" cy="${dy}" r="22" fill="${c}" stroke="${C.ink}" stroke-width="4"/>`).join('')}${K.star4(cx, 230, 16, C.yellow, .22)}`,
+      `<rect x="${cx - 14}" y="392" width="28" height="72" fill="${C.cream}" stroke="${C.ink}" stroke-width="4"/><path d="M${cx - 96} 396L${cx - 74} 340H${cx + 74}L${cx + 96} 396z" fill="${C.ink}" stroke="${C.cream}" stroke-width="4"/><rect x="${cx - 78}" y="286" width="156" height="60" rx="10" fill="#efe0b4" stroke="${C.ink}" stroke-width="4"/><circle cx="${cx - 80}" cy="316" r="14" fill="${C.orange}" stroke="${C.ink}" stroke-width="3"/><circle cx="${cx + 80}" cy="316" r="14" fill="${C.orange}" stroke="${C.ink}" stroke-width="3"/>${K.star4(cx - 40, 316, 12, C.orange, .22)}${K.dot(cx, 316, 9, C.sky)}${K.diamond(cx + 40, 316, 20, 24, C.yellow, `stroke="${C.ink}" stroke-width="2.5"`)}${[-118, 118].map(d => `<rect x="${cx + d - 8}" y="410" width="16" height="54" fill="${C.cream}" stroke="${C.ink}" stroke-width="3"/>${K.star4(cx + d, 394, 14, C.yellow, .22)}`).join('')}`,
+    ][k];
+    return `<g class="st st${k}">
+      <circle class="halo" cx="${cx}" cy="340" r="170" fill="url(#haloG)"/>
+      <ellipse class="glow" cx="${cx}" cy="466" rx="130" ry="20" fill="none" stroke="${C.yellow}" stroke-width="6" stroke-dasharray="4 10" stroke-linecap="round"/>
+      <g filter="url(#crayon)">${art}</g>
+      <g filter="url(#rough)">${K.pill(cx - 88, 160, 176, 46, C.ink, C.cream, 3)}${K.txt(cx, 182, 15, nm, C.cream, { f: false })}${K.txt(cx, 199, 11, '↔ ' + N.room(k), C.peach, { f: false, w: 600 })}</g>
+      <g class="here" transform="translate(${cx},104) scale(1.55)"><path d="M-20 22L0 -4L20 22z" fill="${C.orange}" stroke="${C.ink}" stroke-width="3"/><circle cy="-14" r="9" fill="${C.cream}" stroke="${C.ink}" stroke-width="3"/>${K.txt(0, -34, 12, L('旅人在此', 'WANDERER'), C.yellow, { f: false })}</g>
+      <g class="badge">${K.star4(cx + 90, 222, 22, C.yellow, .22, `stroke="${C.ink}" stroke-width="3"`)}</g>
+      <rect data-k="${k}" x="${cx - 132}" y="160" width="264" height="320" fill="transparent" style="cursor:pointer"/></g>`;
+  };
+  return `<defs><radialGradient id="haloG"><stop offset="0" stop-color="#eeb23a" stop-opacity=".34"/><stop offset="1" stop-color="#eeb23a" stop-opacity="0"/></radialGradient></defs>${floor}${pillars}${lanterns}${[0, 1, 2, 3, 4, 5].map(st).join('')}`;
+}
+const LAYERS = [{ id: 'L0', period: 600, f: .33, build: skyContent }, { id: 'L1', period: 1080, f: .6, build: midContent }, { id: 'L2', period: SW, f: 1, build: fgContent }];
+function buildLayers() {
+  LAYERS.forEach(l => {
+    const copies = Math.ceil((2200 + l.period) / l.period), inner = l.build();
+    $('#' + l.id).innerHTML = `<svg width="${copies * l.period}" height="560" viewBox="0 0 ${copies * l.period} 560">${[...Array(copies)].map((_, i) => `<g transform="translate(${i * l.period},0)">${inner}</g>`).join('')}</svg>`;
+  });
+  const rail = `<rect y="14" width="1600" height="50" fill="${C.ink}"/><rect y="10" width="1600" height="8" fill="${C.cream}"/>${[...Array(40)].map((_, i) => K.diamond(20 + i * 40, 40, 16, 22, i % 2 ? C.orange : C.blue)).join('')}`;
+  $('#rail').innerHTML = rail; refreshStations();
+}
+function markAt() { if (!S) return; const at = ({ gallery: 0, mirror: 1, moon: 2, star: 3, orders: 4, altar: 5 })[S && S.loc]; for (let k = 0; k < 6; k++) $$('.st' + k).forEach(e => e.classList.toggle('at', S.phase === 'playing' && at === k)); }
+function refreshStations() { markAt();
+  if (!S) return;
+  const playing = S.phase === 'playing', won = S.phase === 'won';
+  for (let k = 0; k < 6; k++) $$('.st' + k).forEach(e => { e.classList.toggle('on', playing && S.stage === k + 1); e.classList.toggle('done', won || (S.stage > k + 1 && S.phase !== 'lobby')); e.classList.toggle('locked', !won && S.stage < k + 1); });
+}
+const wrapD = d => ((d % SW) + SW + SW / 2) % SW - SW / 2;
+function nearest() { const c = ui.x + $('#pano').clientWidth / 2; let b = 0, bd = 1e9; for (let k = 0; k < 6; k++) { const d = Math.abs(wrapD(XK(k) - c)); if (d < bd) { bd = d; b = k; } } return { k: b, d: bd }; }
+function gotoStation(k) { ui.goal = ui.x + wrapD(XK(k) - $('#pano').clientWidth / 2 - ui.x); ui.v = 0; SFX.whoosh(); }   // x 不取模，避免目标值和当前值差整整一圈而狂转
+function applyX() { LAYERS.forEach(l => { const off = (((ui.x * l.f) % l.period) + l.period) % l.period; $('#' + l.id).style.transform = `translate3d(${-off}px,0,0)`; }); }
+function loop() {
+  const W = $('#pano').clientWidth;
+  if (ui.goal !== null) { const d = ui.goal - ui.x; if (Math.abs(d) < .6) { ui.x = ui.goal; ui.goal = null; } else ui.x += d * .1; }
+  else if (!ui.drag && Math.abs(ui.v) > .05) { ui.x += ui.v; ui.v *= .94; }
+  applyX();
+  const n = nearest(), deg = Math.round(((((ui.x + W / 2) % SW) + SW) % SW) / SW * 360);
+  $('#azim').textContent = `${L('方位', 'AZ')} ${String(deg).padStart(3, '0')}°`;
+  $$('.chip').forEach(c => c.classList.toggle('here', +c.dataset.k === n.k && n.d < 130));
+  // 目标台子在屏幕外时，在边缘显示指向它的箭头；只有点击才会转过去，不会自动转
+  const aL = $('#arrL'), aR = $('#arrR');
+  if (S && S.phase === 'playing' && S.stage >= 1 && S.stage <= 6 && ui.focus === null) {
+    const k = S.stage - 1, d = wrapD(XK(k) - (ui.x + W / 2)), off = Math.abs(d) > W / 2 - 60;
+    aL.style.display = off && d < 0 ? 'flex' : 'none'; aR.style.display = off && d > 0 ? 'flex' : 'none'; aL.dataset.k = aR.dataset.k = k;
+  } else { aL.style.display = 'none'; aR.style.display = 'none'; }
+  requestAnimationFrame(loop);
+}
+// 拖拽 / 滚轮 / 键盘
+const pano = $('#pano');
+pano.addEventListener('pointerdown', e => { if (ui.focus !== null) return; pano.setPointerCapture(e.pointerId); ui.drag = { x0: ui.x, px: e.clientX, last: e.clientX }; ui.moved = false; ui.goal = null; ui.v = 0; pano.classList.add('drag'); SFX.unlock(); });
+pano.addEventListener('pointermove', e => { if (!ui.drag) return; const dx = e.clientX - ui.drag.px; if (Math.abs(dx) > 5) ui.moved = true; ui.x = ui.drag.x0 - dx; ui.v = -(e.clientX - ui.drag.last) * .9; ui.drag.last = e.clientX; });
+const endDrag = e => { if (!ui.drag) return; const wasMoved = ui.moved; ui.drag = null; pano.classList.remove('drag'); if (!wasMoved && e.type === 'pointerup') { const h = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.dataset && el.dataset.k !== undefined); if (h) openFocus(+h.dataset.k); } };
+pano.addEventListener('pointerup', endDrag); pano.addEventListener('pointercancel', endDrag);
+pano.addEventListener('wheel', e => { if (ui.focus !== null) return; e.preventDefault(); ui.goal = null; ui.x += (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * .9; ui.v = 0; }, { passive: false });
+$('#arrL').onclick = $('#arrR').onclick = e => { SFX.unlock(); gotoStation(+e.currentTarget.dataset.k); };
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'Escape') { if (!$('#book').hidden) closeBook(); else closeFocus(); }
+  else if (ui.focus === null && e.key === 'ArrowLeft') { ui.goal = null; ui.x -= 70; } else if (ui.focus === null && e.key === 'ArrowRight') { ui.goal = null; ui.x += 70; }
+  else if (/^[1-6]$/.test(e.key) && ui.focus === null) gotoStation(+e.key - 1);
+  else if (e.key === 'Enter' && ui.focus === null && S && S.phase === 'playing') openFocus(nearest().k);
+});
+
+// ======================= 特写视图 =======================
+const FTITLE = k => [L('星图桌', 'Star Table'), L('对称碑', 'Mirror Steles'), L('星环仪', 'Orrery'), L('调频台', 'Tuning Console'), L('星令台', 'Order Console'), L('祭仪卷轴', 'Ritual Scroll')][k];
+const FEN = ['STAR TABLE', 'MIRROR STELES', 'ORRERY', 'TUNING CONSOLE', 'ORDER CONSOLE', 'RITUAL SCROLL'];
+function openFocus(k) {
+  if (!S || S.phase !== 'playing') return;
+  ui.focus = k; ui.fsig = null; SFX.click(); const el = $('#focus'); el.hidden = false;
+  el.innerHTML = `<div class="fcard"><div class="fhead"><div><h2>${FTITLE(k)}</h2><div class="en">${FEN[k]}</div></div><button class="btn ghost back" id="fback">${L('← 返回全景', '← BACK TO PANORAMA')}</button></div><div id="fbody"></div></div>`;
+  $('#fback').onclick = closeFocus; buildFocus(); NET.act('view', { i: k });
+}
+function closeFocus() {
+  if (ui.focus === null) return;
+  ui.focus = null; ui.fsig = null; $('#focus').hidden = true; $('#focus').innerHTML = ''; if (ui.holding) setShield(false); if (ui.chanting) setChant(false); NET.act('view', { i: -1 });
+}
+const sleeping = () => `<div class="fbody"><div class="side" style="text-align:center;max-width:440px"><svg viewBox="0 0 200 120" width="220">${K.diamond(100, 60, 120, 100, '#14258f', `stroke="${C.ink}" stroke-width="4"`)}${K.star4(100, 60, 26, C.yellow, .22, 'opacity=".4"')}<text x="150" y="30" font-size="22" font-weight="900" fill="${C.navy}">z</text><text x="166" y="18" font-size="16" font-weight="900" fill="${C.navy}">z</text></svg><p class="msg">${L('这座台子还在沉睡。先完成前面的关卡，它才会亮起来。', 'This console still sleeps. Finish the earlier trials to wake it.')}</p></div></div>`;
+const finished = () => `<div class="fbody"><div class="side" style="text-align:center;max-width:440px"><div class="big">✓ ${L('已点亮', 'Lit')}</div><p class="msg">${L('这一关已经完成了。转身去下一座台子。', 'This trial is complete. Turn to the next console.')}</p></div></div>`;
+function buildFocus() {
+  const k = ui.focus; if (k === null) return; const body = $('#fbody'); if (!body) return;
+  if (S.stage < k + 1) { body.innerHTML = sleeping(); return; }
+  if (S.stage > k + 1 && S.phase !== 'won') { body.innerHTML = finished(); return; }
+  ([focusTrace, focusMirror, focusOrrery, focusTune, focusOrders, focusRitual][k])(body);
+}
+function updateFocus() {
+  const k = ui.focus; if (k === null || !$('#fbody')) return; if (S.stage !== k + 1) { ui.fsig = null; return buildFocus(); }
+  // 只有相关数据变了才重绘，避免鼠标按下和松开之间按钮被替换导致点击丢失
+  const ev = S.events.length ? S.events[S.events.length - 1].t : 0, m = S.mine;
+  const sg = JSON.stringify([[m.done, S.traceIdx], [m.tiles, S.sym], [m.ringRot, S.rings], [m.knob, S.stableSince, S.shield, Math.floor(S.nextHit)], [m.ctrl, m.order && m.order.idx, m.order && m.order.deadline, S.okF, S.okH, S.armed, ev], [S.ritIdx, m.ritual]][k]);
+  if (sg === ui.fsig) return; ui.fsig = sg; const u = [updTrace, updMirror, updOrrery, updTune, updOrders, updRitual][k]; u(); }
+
+// ---- 1 星图桌：描星 ----
+function focusTrace(h) {
+  h.innerHTML = `<div class="fbody"><svg viewBox="0 0 520 520" width="460" id="chart"></svg><div class="side"><div class="big" id="trN"></div><p class="msg">${L('旅人会按顺序描述星点。照着他说的，依次点中对应的星。点错会触发警报并重来。', 'The Wanderer describes the stars in order. Tap the matching stars one by one. A wrong tap triggers an alarm and resets.')}</p><button class="btn ghost" id="trReset">${L('↺ 擦掉重连（不扣警报）', '↺ Clear (no penalty)')}</button></div></div>`;
+  $('#trReset').onclick = () => { SFX.click(); NET.act('traceReset'); }; updTrace();
+}
+function updTrace() {
+  const m = S.mine, W = 400, pos = id => [m.pos[id][0] * W + 60, m.pos[id][1] * W + 60], done = m.done;
+  const line = done.length > 1 ? `<path d="M${done.map(id => pos(id).join(' ')).join('L')}" fill="none" stroke="${C.orange}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>` : '';
+  $('#chart').innerHTML = `<g filter="url(#crayon)"><circle cx="260" cy="260" r="248" fill="${C.cream}" stroke="${C.ink}" stroke-width="5"/><circle cx="260" cy="260" r="212" fill="none" stroke="${C.navy}" stroke-width="3"/><circle cx="260" cy="260" r="160" fill="none" stroke="${C.blue}" stroke-width="2" stroke-dasharray="3 9"/></g>${line}
+    ${S.tokens.map(t => { const [x, y] = pos(t.id), on = done.includes(t.id); return `<g data-t="${t.id}" style="cursor:pointer">${on ? `<circle cx="${x}" cy="${y}" r="30" fill="none" stroke="${C.orange}" stroke-width="4"/>` : ''}${K.token(t.shape, t.color, x, y, 20)}<circle cx="${x}" cy="${y}" r="34" fill="transparent"/></g>`; }).join('')}`;
+  $$('#chart [data-t]').forEach(g => g.onclick = () => { SFX.pitch(+g.dataset.t); NET.act('tap', { id: +g.dataset.t }); });
+  $('#trN').textContent = `${L('已连', 'Linked')} ${done.length} / ${S.traceLen}`;
+}
+
+// ---- 2 对称碑 ----
+function focusMirror(h) { h.innerHTML = `<div class="fbody"><svg viewBox="0 0 440 150" width="560" id="steles"></svg><div class="side"><div class="big" id="mrN"></div><p class="msg">${L('你的瓷片要和旅人的互为镜像：↖ 对 ↗，↙ 对 ↘。带锁的转不动——把它的方向告诉旅人，让他去转；他也会把他锁住的方向告诉你。', 'Your tiles must mirror the Wanderer’s: ↖ pairs with ↗, ↙ with ↘. Locked tiles won’t turn — tell them its direction; they will tell you theirs.')}</p></div></div>`; updMirror(); }
+function updMirror() {
+  const t = S.mine.tiles, lk = S.mine.locked;
+  $('#steles').innerHTML = `<g filter="url(#crayon)"><rect width="440" height="150" rx="18" fill="${C.navy}"/></g>${[0, 1, 2, 3].map(i => `<g data-i="${i}" style="cursor:pointer">${K.comet(t[i], 60 + i * 107, 75, 86, lk[i])}<rect x="${17 + i * 107}" y="32" width="86" height="86" fill="transparent"/></g>`).join('')}`;
+  $$('#steles [data-i]').forEach(g => g.onclick = () => { const i = +g.dataset.i; if (S.mine.locked[i]) return; SFX.pitch(i); NET.act('tile', { i }); });
+  $('#mrN').textContent = `${L('共鸣', 'Resonance')} ${S.sym} / 4`;
+}
+
+// ---- 3 星环仪：月相密码 ----
+function focusOrrery(h) {
+  h.innerHTML = `<div class="fbody"><svg viewBox="0 0 520 520" width="460" id="orr"></svg><div class="side"><div class="big" id="orN"></div><div id="orL"></div><p class="msg">${L('旅人报出三个月相 → 翻星图册的"月相对照"找到对应符号 → 转动对应的星环，让它停在顶端的▼标记下。', 'The Wanderer reads three moon phases → look up the cipher in the Star Book → turn each ring until its symbol sits under the ▼ marker.')}</p><button class="btn ghost" id="orBook">${L('📖 翻开星图册', '📖 OPEN STAR BOOK')}</button></div></div>`;
+  $('#orBook').onclick = () => openBook(2);
+  const R = [225, 165, 105], cx = 260, cy = 260;
+  $('#orr').innerHTML = `<g filter="url(#crayon)"><circle cx="${cx}" cy="${cy}" r="250" fill="${C.navy}" stroke="${C.ink}" stroke-width="5"/></g>
+    ${R.map((r, i) => `<g id="ring${i}" style="transform-origin:${cx}px ${cy}px;transition:transform .45s cubic-bezier(.4,0,.2,1)"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${[C.orange, C.sky, C.yellow][i]}" stroke-width="40" opacity=".92"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${C.ink}" stroke-width="2" stroke-dasharray="2 8" opacity=".5"/>
+      ${[0, 1, 2, 3, 4, 5].map(j => { const a = j * 60 * Math.PI / 180, x = cx + Math.sin(a) * r, y = cy - Math.cos(a) * r; return `<g class="gl" data-j="${j}">${K.glyph(S.mine.ringOrder[i][j], x, y, 13, C.cream, `stroke="${C.ink}" stroke-width="2.5" stroke-linejoin="round"`)}</g>`; }).join('')}</g>`).join('')}
+    ${K.star4(cx, cy, 42, C.yellow, .22, `stroke="${C.ink}" stroke-width="3"`)}${K.dot(cx, cy, 9, C.orange)}
+    <path d="M${cx - 16} 6L${cx + 16} 6L${cx} 34z" fill="${C.cream}" stroke="${C.ink}" stroke-width="3.5" stroke-linejoin="round"/>`;
+  updOrrery();
+}
+function ringTurn(i, d) { SFX.pitch(i + d); NET.act('ring', { i, d }); }
+function updOrrery() {
+  const m = S.mine; [0, 1, 2].forEach(i => { const g = $('#ring' + i); if (g) g.style.transform = `rotate(${-m.ringRot[i] * 60}deg)`; });
+  $('#orN').textContent = `${L('对位', 'Aligned')} ${S.rings} / 3`;
+  $('#orL').innerHTML = [0, 1, 2].map(i => `<div class="rrow"><span style="color:${['#c85a1c', '#2b7fb8', '#b88a14'][i]}">${L(['外圈', '中圈', '内圈'][i], ['Outer', 'Middle', 'Inner'][i])}：</span><svg width="34" height="34" viewBox="-17 -17 34 34" style="margin-right:auto">${K.glyph(m.ringOrder[i][m.ringRot[i]], 0, 0, 12, C.ink)}</svg><button data-r="${i}" data-d="-1">◀</button><button data-r="${i}" data-d="1">▶</button></div>`).join('');
+  $$('#orL button').forEach(b => b.onclick = () => ringTurn(+b.dataset.r, +b.dataset.d));
+}
+
+// ---- 4 调频台：旋钮 + 护盾 ----
+function focusTune(h) {
+  h.innerHTML = `<div class="fbody"><div style="display:flex;gap:34px"><div style="text-align:center"><svg viewBox="-80 -80 160 160" width="190" id="kA"></svg><div class="big">α</div></div><div style="text-align:center"><svg viewBox="-80 -80 160 160" width="190" id="kB"></svg><div class="big">β</div></div></div>
+    <div class="side" style="text-align:center"><svg width="150" height="150" viewBox="-60 -60 120 120"><circle r="46" fill="none" stroke="${C.ink}" stroke-width="9" opacity=".2"/><circle id="tR" r="46" fill="none" stroke="${C.orange}" stroke-width="11" stroke-linecap="round" transform="rotate(-90)" stroke-dasharray="0 999"/><text id="tT" y="8" text-anchor="middle" font-size="22" font-weight="900" fill="${C.navy}"></text></svg><div id="tuS" class="msg"></div>
+    <button class="btn" id="shield" style="width:100%;margin-top:8px;touch-action:none;user-select:none">${L('按住护盾 · HOLD', 'HOLD SHIELD')}</button><div id="stm" class="big" style="color:var(--orange);margin-top:8px;min-height:30px"></div>
+    <p class="msg">${L('你看不到星，只有旅人看得到。转旋钮，听他说星往哪漂；它们的方向是反直觉的。风暴来袭前按住护盾——但按住时旋钮会被锁定。', 'You cannot see the star — only the Wanderer can. Turn the knobs and listen. The directions are counter-intuitive. Hold the shield before a storm hits — but the knobs lock while you hold it.')}</p></div></div>`;
+  [['kA', 'a'], ['kB', 'b']].forEach(([id, key]) => makeKnob($('#' + id), key));
+  const sh = $('#shield'); sh.addEventListener('pointerdown', e => { e.preventDefault(); sh.setPointerCapture(e.pointerId); setShield(true); });
+  ['pointerup', 'pointercancel'].forEach(ev => sh.addEventListener(ev, () => setShield(false))); updTune();
+}
+function setShield(on) {
+  if (on === ui.holding) return; ui.holding = on; NET.act('shield', { on }); clearInterval(ui.hb);
+  if (on) { SFX.thud(); ui.hb = setInterval(() => NET.act('shield', { on: true }), 800); }
+}
+function knobSVG(v, locked) {
+  const ang = -135 + 270 * v, r = 56;
+  return `<circle r="${r + 8}" fill="${C.ink}"/><circle r="${r}" fill="${C.cream}" stroke="${C.ink}" stroke-width="3"/>${[...Array(21)].map((_, i) => { const a = (-135 + i * 13.5) * Math.PI / 180, l = i % 5 === 0 ? 11 : 6; return `<path d="M${Math.sin(a) * (r + 1)} ${-Math.cos(a) * (r + 1)}L${Math.sin(a) * (r + 1 + l)} ${-Math.cos(a) * (r + 1 + l)}" stroke="${C.peach}" stroke-width="3"/>`; }).join('')}
+    <circle r="${r - 16}" fill="${locked ? C.navy : C.blue}"/>${K.star4(0, 0, r - 12, C.cream, .22)}<g transform="rotate(${ang})"><path d="M0 0V${-(r - 8)}" stroke="${C.ink}" stroke-width="7" stroke-linecap="round"/><circle cy="${-(r - 8)}" r="6" fill="${C.orange}"/></g><circle r="7" fill="${C.ink}"/>${locked ? `<text y="68" text-anchor="middle" font-size="11" font-weight="900" fill="${C.orange}">LOCK</text>` : ''}`;
+}
+function makeKnob(svg, key) {
+  const draw = () => { svg.innerHTML = knobSVG(ui.knob[key], ui.holding || S.shield); };
+  svg._draw = draw; draw();
+  const val = e => { const r = svg.getBoundingClientRect(), a = Math.atan2(e.clientX - (r.left + r.width / 2), -(e.clientY - (r.top + r.height / 2))) * 180 / Math.PI; return Math.abs(a) > 135 ? (a > 0 ? 1 : 0) : (a + 135) / 270; };
+  svg.style.cursor = 'grab'; svg.style.touchAction = 'none';
+  svg.addEventListener('pointerdown', e => { if (ui.holding || S.shield) return; svg.setPointerCapture(e.pointerId); ui.dragKnob = key; ui.knob[key] = val(e); draw(); SFX.unlock(); });
+  svg.addEventListener('pointermove', e => { if (ui.dragKnob !== key) return; ui.knob[key] = val(e); draw(); const t = performance.now(); if (t - ui.lastKnobSend > 60) { ui.lastKnobSend = t; NET.act('knob', { a: ui.knob.a, b: ui.knob.b }); } });
+  const up = () => { if (ui.dragKnob !== key) return; ui.dragKnob = null; NET.act('knob', { a: ui.knob.a, b: ui.knob.b }); };
+  svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up);
+}
+function updTune() {
+  if (!ui.dragKnob) { ui.knob.a = S.mine.knob[0]; ui.knob.b = S.mine.knob[1]; }
+  ['kA', 'kB'].forEach(id => { const e = $('#' + id); if (e && e._draw) e._draw(); });
+  const p = S.stableSince ? Math.min(1, (NET.now() - S.stableSince) / cfg.stable) : 0;
+  $('#tR').setAttribute('stroke-dasharray', `${p * 289} 999`); $('#tT').textContent = p ? (p * cfg.stable).toFixed(1) + 's' : '';
+  $('#tuS').textContent = S.stableSince ? L('旅人那边星在稳定…保持！', 'The star is settling… hold it!') : L('旅人看到的星还没对准中心。', 'The star is not centered yet.');
+  const warn = S.nextHit - NET.now(), w = warn > 0 && warn <= cfg.stormWarn;
+  $('#stm').textContent = w ? L(`⚠ 风暴 ${Math.ceil(warn)}s — 按住护盾！`, `⚠ STORM ${Math.ceil(warn)}s — HOLD SHIELD!`) : (S.shield ? L('护盾运转中', 'Shield up') : '');
+  $('#shield').style.background = S.shield ? C.yellow : (w ? C.orange : C.ink); $('#shield').style.color = S.shield ? C.ink : C.cream;
+}
+
+// ---- 5 星令台 ----
+function focusOrders(h) { h.innerHTML = `<div class="fbody"><div id="ordA" style="width:420px;max-width:100%"></div></div>`; updOrders(); }
+function updOrders() {
+  if (!S.armed) { $('#ordA').innerHTML = `<p class="msg" style="text-align:center">${L('旅人还没给星令盘通电。等他在星令殿摇动曲柄——星令会在通电后开始。', 'The Wanderer has not powered the dial yet. Orders begin once they turn the crank in the Order Hall.')}</p>`; return; }
+  const m = S.mine, o = m.order, g = cfg.orderGoal, left = o ? Math.max(0, (o.deadline - NET.now()) / cfg.orderTime) : 0;
+  const feed = S.events.filter(e => e.k === 'toggle' || e.k === 'orderOK').slice(-4).reverse().map(e => `<div>${EV[e.k](e.p)}</div>`).join('');
+  $('#ordA').innerHTML = `${o ? `<div style="background:var(--ink);color:var(--cream);border-radius:16px;padding:12px 14px;font-weight:800;font-size:15px">${L('告诉旅人', 'Tell the Wanderer')}：<br><span style="color:var(--yellow);font-size:22px">${L(`把【${N.ctrlF(o.idx)}】${o.target ? '点亮' : '熄灭'}`, `${o.target ? 'Light' : 'Dim'} [${N.ctrlF(o.idx)}]`)}</span><div style="height:7px;background:#f5eedd33;border-radius:4px;margin-top:10px"><div id="hOrdBar" style="height:100%;width:${left * 100}%;background:var(--orange);border-radius:4px"></div></div></div>` : `<p class="msg">${L('你的星令都传达完了 ✓', 'All your orders are relayed ✓')}</p>`}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0">${m.ctrl.map((on, i) => `<button class="lamp ${on ? 'on' : ''}" data-c="${i}">${N.ctrlH(i)}<br><small>${on ? L('亮', 'LIT') : L('灭', 'DIM')}</small></button>`).join('')}</div>
+    <p class="msg">${L('旅人会喊出要你拨的星名——听到就拨。你屏幕上方的星令，是要你喊给旅人听的。', 'The Wanderer will call out which of these to flip. The order above is for you to call out to them.')}</p>
+    <p class="msg" style="color:var(--navy);font-size:15px;font-weight:900">${L('你传达的', 'Relayed')} ${S.okH}/${g} · ${L('你执行的', 'Done')} ${S.okF}/${g}</p>
+    <div class="feed">${feed || `<div style="opacity:.5">${L('双方的拨动会显示在这里', 'Each side’s flips show up here')}</div>`}</div>`;
+  $$('#ordA .lamp').forEach(b => b.onclick = () => { SFX.pitch(+b.dataset.c); NET.act('ctrl', { i: +b.dataset.c }); });
+}
+
+const RIT = { moon: () => L('月盘', 'Moon Disc'), lamp: () => L('星灯', 'Star Lamp'), bell: () => L('铃', 'Bell'), bowl: () => L('水盂', 'Bowl') };
+const RIT_ICON = o => ({ moon: K.moon(2, 0, 0, 13), lamp: K.star4(0, 0, 15, C.yellow, .22, `stroke="${C.ink}" stroke-width="2.5"`), bell: `<path d="M-11 8Q-11 -10 0 -12Q11 -10 11 8z" fill="${C.orange}" stroke="${C.ink}" stroke-width="2.5"/><circle cy="11" r="3" fill="${C.ink}"/>`, bowl: `<path d="M-14 -4H14Q12 12 0 12Q-12 12 -14 -4z" fill="${C.sky}" stroke="${C.ink}" stroke-width="2.5"/>` })[o];
+const RIT_TXT = x => ({ circle: () => L(`${x.dir === 'cw' ? '顺时针' : '逆时针'}画圈 ${x.n} 圈`, `circle ${x.dir === 'cw' ? 'clockwise' : 'counter-clockwise'} × ${x.n}`), hold: () => L(`长按 ${x.sec} 秒`, `hold ${x.sec} s`), shake: () => L(`摇 ${x.n} 下`, `shake × ${x.n}`), pour: () => L(`向${x.dir === 'L' ? '左' : '右'}倾倒`, `pour to the ${x.dir === 'L' ? 'left' : 'right'}`) })[x.g]();
+function focusRitual(h) {
+  h.innerHTML = `<div class="fbody"><div class="scroll" id="scrollBox"></div><div class="side"><div class="big" id="rtN"></div><p class="msg">${L('这是祭仪的卷轴，只有你看得到。把每一步念给旅人：他要在祭坛上对准的祭器，做对的手势。标着♪的步骤，他动手的同时你必须按住「吟唱」。', 'This is the rite’s scroll — only you can see it. Read each step to the Wanderer: which relic, which gesture. On steps marked ♪, you must hold “Chant” while they act.')}</p>
+    <button class="btn" id="chant" style="width:100%;touch-action:none;user-select:none">${L('按住吟唱 · HOLD TO CHANT', 'HOLD TO CHANT')}</button><div id="rtS" class="msg" style="min-height:44px"></div></div></div>`;
+  const b = $('#chant'); b.addEventListener('pointerdown', e => { e.preventDefault(); b.setPointerCapture(e.pointerId); setChant(true); }); ['pointerup', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => setChant(false)));
+  updRitual();
+}
+function setChant(on) { if (on === ui.chanting) return; ui.chanting = on; NET.act('chant', { on }); clearInterval(ui.cb); if (on) { SFX.thud(); ui.cb = setInterval(() => NET.act('chant', { on: true }), 800); } const b = $('#chant'); if (b) b.style.background = on ? C.yellow : ''; }
+function updRitual() {
+  const r = S.mine.ritual, idx = S.ritIdx;
+  $('#scrollBox').innerHTML = r.map((x, i) => `<div class="row ${i < idx ? 'done' : i === idx ? 'cur' : ''}"><span style="width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--cream);display:grid;place-items:center;font-size:14px">${i < idx ? '✓' : i + 1}</span><svg width="38" height="38" viewBox="-20 -20 40 40">${RIT_ICON(x.obj)}</svg><span style="flex:1">${RIT[x.obj]()}<br><small style="font-weight:700">${RIT_TXT(x)}</small></span>${x.chant ? '<b style="color:#b8501c;font-size:22px">♪</b>' : ''}</div>`).join('');
+  $('#rtN').textContent = `${L('仪式', 'Rite')} ${Math.min(idx, r.length)} / ${r.length}`;
+  const cur = r[idx]; $('#rtS').textContent = !cur ? '' : cur.chant ? L('这一步需要吟唱——旅人动手时按住按钮，别松开！', 'This step needs the chant — hold the button while they act!') : L('这一步不需要吟唱。', 'No chant needed for this step.');
+}
+
+// ======================= 星图册 =======================
+const BOOK = () => [L('总览', 'Overview'), L('星点图例', 'Stars'), L('月相对照', 'Moon cipher'), L('镜像规则', 'Mirror'), L('风暴与护盾', 'Storm'), L('星令', 'Orders')];
+function bookPage(i) {
+  const m = S && S.mine, ln = (a, b) => `<p class="msg">${L(a, b)}</p>`;
+  if (i === 0) return `<h3>${L('六道关卡', 'The six trials')}</h3>${[1, 2, 3, 4, 5, 6].map(n => `<p class="msg"><b>${n}. ${N.stage(n)}</b> — ${[L('旅人描述星的顺序，你在星图桌上依次点中。', 'The Wanderer describes the order; you tap the stars.'), L('转动你的瓷片，和旅人互为镜像。', 'Turn your tiles to mirror theirs.'), L('他报月相，你查对照表，转星环。', 'They read moon phases; you look up the cipher and turn rings.'), L('你转旋钮，他看星漂移。风暴时按住护盾。', 'You turn knobs; they watch the star drift. Hold the shield in storms.'), L('互相喊对方面板上的星名。', 'Call out star names on each other’s panels.'), L('把星钥匙举给摄像头。', 'Show the star key to the camera.')][n - 1]}</p>`).join('')}`;
+  if (i === 1) return `<h3>${L('本局的 7 颗星', 'This round’s 7 stars')}</h3><svg viewBox="0 0 520 90" width="100%">${(S ? S.tokens : []).map((t, j) => K.token(t.shape, t.color, 36 + j * 72, 44, 20)).join('')}</svg>${ln('只有图形，没有名字——怎么描述它们，由你和旅人商量。', 'Shapes only, no names — agree with the Wanderer on how to describe them.')}`;
+  if (i === 2) return `<h3>${L('月相 → 符号', 'Moon phase → symbol')}</h3><svg viewBox="0 0 520 250" width="100%">${[0, 1, 2, 3, 4, 5].map(p => { const x = 20 + (p % 3) * 170, y = 14 + Math.floor(p / 3) * 120; return `<rect x="${x}" y="${y}" width="160" height="106" rx="14" fill="none" stroke="${C.navy}" stroke-width="3"/>${K.moon(p, x + 42, y + 53, 28)}<path d="M${x + 82} ${y + 53}h26" stroke="${C.ink}" stroke-width="3"/><path d="M${x + 102} ${y + 46}l8 7l-8 7" fill="none" stroke="${C.ink}" stroke-width="3"/>${m ? K.glyph(m.cipher[p], x + 130, y + 53, 16, C.orange, `stroke="${C.ink}" stroke-width="2.5" stroke-linejoin="round"`) : ''}`; }).join('')}</svg>${ln('只有符号，没有名字——你得自己想办法把它描述给旅人。', 'Symbols only, no names — find your own words to describe them.')}`;
+  if (i === 3) return `<h3>${L('镜像规则', 'Mirror rule')}</h3><svg viewBox="0 0 520 130" width="100%">${[[0, 1], [3, 2]].map(([a, b], j) => `${K.comet(a, 90 + j * 250, 60, 80, false)}<text x="${150 + j * 250}" y="66" text-anchor="middle" font-size="26" font-weight="900" fill="${C.ink}">↔</text>${K.comet(b, 210 + j * 250, 60, 80, false)}`).join('')}</svg>${ln('你的每块瓷片，都要和旅人同位置的那块互为左右镜像。', 'Each of your tiles must be the left-right mirror of the Wanderer’s tile in the same slot.')}`;
+  if (i === 4) return `<h3>${L('风暴与护盾', 'Storm & shield')}</h3>${ln('风暴每隔十几秒来一次，来前 4 秒会预警。未护盾就被击中：星被推偏，警报 +1。', 'Storms arrive every dozen seconds with a 4 s warning. If unshielded: the star is pushed off and an alarm is added.')}${ln('按住护盾期间旋钮会被锁住，所以要掐准时间。', 'Knobs lock while the shield is held, so time it well.')}`;
+  return `<h3>${L('星令', 'Orders')}</h3>${ln('每条星令都有时限。超时警报 +1。你的屏幕上的星令，是要旅人去拨他那边的星；他的星令，才是要你拨。', 'Every order has a timer; late = alarm. Your on-screen order is for the Wanderer to flip; theirs is for you.')}`;
+}
+function openBook(i = ui.tab) {
+  ui.tab = i; const el = $('#book'); el.hidden = false; SFX.click();
+  el.innerHTML = `<div class="fcard" style="max-width:700px"><div class="fhead"><div><h2>${L('星图册', 'Star Book')}</h2><div class="en">STAR BOOK</div></div><button class="btn ghost back" id="bkClose">${L('合上', 'CLOSE')}</button></div><div>${BOOK().map((t, j) => `<span class="tab ${j === ui.tab ? 'on' : ''}" data-j="${j}">${t}</span>`).join('')}</div><div id="bkP">${bookPage(ui.tab)}</div></div>`;
+  $('#bkClose').onclick = closeBook; $$('#book .tab').forEach(t => t.onclick = () => openBook(+t.dataset.j));
+}
+function closeBook() { $('#book').hidden = true; $('#book').innerHTML = ''; }
+$('#bookBtn').onclick = () => openBook(ui.tab);
+
+// ======================= HUD / 日志 / 大厅 / 结局 =======================
+const EV = { armed: () => L('旅人给星令盘通了电，星令开始了。', 'The dial is powered. Orders begin.'), start: () => L('任务开始。旅人进入了星门厅。', 'Begin. The Wanderer enters the gate hall.'), traceBad: () => L('⚠ 点错星点，警报 +1', '⚠ Wrong star. Alarm +1'), traceOK: () => L('描星完成，镜厅的门亮起。', 'Constellation traced. The mirror hall wakes.'),
+  symOK: () => L('对称门拼合，月室的门亮起。', 'Mirror complete. The moon chamber wakes.'), ringsOK: () => L('星环对位，星门开始漂移。', 'Rings aligned. The gate star begins to drift.'), tuneOK: () => L('星稳定了，星令殿亮起。', 'The star is steady. The order hall wakes.'),
+  stormHit: () => L('⚠ 风暴击中，星被推偏，警报 +1', '⚠ Storm hit! Star pushed off. Alarm +1'), shielded: () => L('护盾挡住了风暴。', 'The shield held against the storm.'),
+  toggle: p => p.side === 'phone' ? L(`旅人${p.on ? '点亮' : '熄灭'}了【${N.ctrlF(p.idx)}】`, `The Wanderer ${p.on ? 'lit' : 'dimmed'} [${N.ctrlF(p.idx)}]`) : L(`你${p.on ? '点亮' : '熄灭'}了【${N.ctrlH(p.idx)}】`, `You ${p.on ? 'lit' : 'dimmed'} [${N.ctrlH(p.idx)}]`),
+  orderOK: p => p.side === 'hq' ? L(`✓ 你的星令完成：旅人拨对了【${N.ctrlF(p.idx)}】`, `✓ Your order is done: [${N.ctrlF(p.idx)}]`) : L(`✓ 旅人的星令完成：你拨对了【${N.ctrlH(p.idx)}】`, `✓ Their order is done: [${N.ctrlH(p.idx)}]`),
+  orderNew: p => p.who === 'hq' ? L('你有一条新星令！', 'You have a new order!') : L('旅人有一条新星令。', 'The Wanderer has a new order.'),
+  orderLate: () => L('⚠ 星令超时，警报 +1', '⚠ Order timed out. Alarm +1'), ordersOK: () => L('星令传递完成，祭坛亮起。', 'Orders complete. The altar wakes.'),
+  ritOK: () => L('祭器回应了，仪式推进一步。', 'The relic answers. The rite advances.'), ritBad: () => L('⚠ 祭器没有回应——错误的手势，警报 +1', '⚠ Wrong relic or gesture. Alarm +1'), ritWeak: () => L('旅人的动作还不够。', 'The gesture was not enough.'),
+  ritNoChant: () => L('⚠ 祭器沉默——需要你吟唱！', '⚠ The relic is silent — you must chant!'), ritualWin: () => L('祭仪完成。星门开了。', 'The rite is complete. The gate opens.'),
+  lose: p => L('任务失败：', 'Failed: ') + (p.why === 'alarm' ? L('警报已满', 'alarms maxed out') : L('黎明已至', 'dawn arrived')) };
+function renderHUD() {
+  $('#ttl').textContent = L('星象师 · STARGAZER', 'STARGAZER'); $('#lang').textContent = LANG.get() === 'zh' ? 'EN' : '中文'; $('#tmL').textContent = L('距离黎明', 'UNTIL DAWN');
+  $('#dots').innerHTML = [...Array(cfg.maxAlarm)].map((_, i) => `<i class="${i < S.alarm ? 'on' : ''}"></i>`).join(''); $('#sun').innerHTML = K.star4(0, 0, 12, C.yellow, .22, `stroke="${C.ink}" stroke-width="1.5"`);
+  $('#bookBtn').textContent = L('📖 星图册', '📖 STAR BOOK');
+  $('#compass').innerHTML = [0, 1, 2, 3, 4, 5].map(k => `<button class="chip ${S.phase === 'playing' && S.stage === k + 1 ? 'act' : ''} ${S.stage > k + 1 || S.phase === 'won' ? 'done' : ''} ${S.stage < k + 1 ? 'lock' : ''}" data-k="${k}"><i><b>${S.stage > k + 1 || S.phase === 'won' ? '✓' : k + 1}</b></i><span>${FTITLE(k)}<small>↔ ${N.room(k)}</small></span></button>`).join('');
+  $$('.chip').forEach(c => c.onclick = () => gotoStation(+c.dataset.k));
+  const L2 = LOCN(); $('#loc').innerHTML = `<svg width="34" height="34" viewBox="-17 -17 34 34">${K.diamond(0, 0, 30, 30, C.orange, `stroke="${C.cream}" stroke-width="2.5"`)}${K.dot(0, 0, 4, C.ink)}</svg><div><small>${L('旅人在', 'WANDERER AT')}</small>${L2[S.loc] || L2.hall}</div>`;
+  const evs = [...S.events].reverse().slice(0, 3); $('#notes').innerHTML = evs.map(e => `<div>${EV[e.k] ? EV[e.k](e.p || {}) : e.k}</div>`).join('');
+  $('#arrL').innerHTML = `◀ <span>${FTITLE(Math.max(0, Math.min(5, S.stage - 1)))}</span>`; $('#arrR').innerHTML = `<span>${FTITLE(Math.max(0, Math.min(5, S.stage - 1)))}</span> ▶`;
+  const k = S.stage - 1, n = nearest(); $('#hint').innerHTML = S.phase !== 'playing' ? '' : S.stage >= 1 && S.stage <= 6 ? `${L('第', 'Trial ')} ${S.stage}${L(' 关', '')} · <b>${N.stage(S.stage)}</b> — ${n.k === k && n.d < 130 ? L('点击台子进入', 'click the console to enter') : L(`转身去【${FTITLE(k)}】`, `turn to the [${FTITLE(k)}]`)}` : '';
+  $('#hint').style.display = S.phase === 'playing' && S.stage >= 1 ? '' : 'none';
+}
+function tickTimer() {
+  if (!S) return; let rem = cfg.limit; if (S.startAt) rem = Math.min(cfg.limit, cfg.limit - ((S.endAt || NET.now()) - S.startAt));
+  $('#tm').textContent = fmt(rem); const p = Math.max(0, Math.min(1, 1 - rem / cfg.limit)); $('#fill').style.width = p * 100 + '%'; $('#sun').style.left = p * 100 + '%'; $('#tm').style.color = S.phase === 'playing' && rem <= 60 ? C.orange : '';
+  const warn = S.nextHit - NET.now(), w = S.phase === 'playing' && S.stage === 4 && warn > 0 && warn <= cfg.stormWarn; pano.classList.toggle('storm', !!w);
+  if (ui.focus === 3) updTune(); if (ui.focus === 4 && S.mine.order) { const b = $('#hOrdBar'); if (b) b.style.width = Math.max(0, (S.mine.order.deadline - NET.now()) / cfg.orderTime * 100) + '%'; }
+}
+function wideArt(kind) {
+  K.reseed(kind === 'home' ? 12 : 44); const won = kind === 'won';
+  if (kind === 'home') return `<svg viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice"><g filter="url(#crayon)">${K.harlequin(960, 600, 100, C.ink, C.blue)}${K.strokes([[0, 120, 960, 40, 50, C.ink, .5], [0, 500, 960, 420, 40, C.ink, .5]])}
+      <circle cx="480" cy="250" r="190" fill="none" stroke="${C.orange}" stroke-width="9"/><circle cx="480" cy="250" r="160" fill="none" stroke="${C.peach}" stroke-width="3" stroke-dasharray="2 11" stroke-linecap="round"/>${K.wisp(-60, 60, 1.6, 1.3, C.cream)}${K.wisp(1000, 330, -1.5, 1.2, C.cream)}${K.wisp(-40, 260, 1.2, .9, C.peach, .9)}
+      ${K.star4(480, 250, 200, C.cream, .11)}${K.dot(480, 250, 66, C.orange)}${K.dot(480, 250, 46, C.yellow)}${K.star4(480, 250, 90, '#fff7d8', .2)}${K.scatter(24, 960, 520, [C.orange, C.peach, C.yellow], 4, 12)}${K.scatter(8, 960, 480, [C.cream, C.yellow], 9, 20, 'star')}
+      <path d="M0 430C100 396 200 410 300 430C400 396 560 400 660 428C780 400 880 410 960 430V600H0z" fill="${C.cream}"/></g></svg>`;
+  return `<svg viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice"><g filter="url(#crayon)"><rect width="960" height="600" fill="${won ? C.sky : C.navy}"/><rect width="960" height="280" fill="${won ? C.blue : C.ink}"/><rect y="400" width="960" height="200" fill="${won ? C.peach : C.blue}"/>
+      <circle cx="480" cy="300" r="170" fill="none" stroke="${C.orange}" stroke-width="10"/><circle cx="480" cy="300" r="128" fill="${won ? C.yellow : C.peach}"/>${K.star4(480, 300, 260, C.cream, .08)}${K.scatter(20, 960, 300, [C.cream, C.peach], 3, 9)}${K.cloud(-40, 380, 1.5, C.cream)}${K.cloud(560, 400, 1.4, C.cream)}</g></svg>`;
+}
+function renderLobby() {
+  const s = S; $('#lobby').innerHTML = `${wideArt('home')}<div class="center"><div style="font-size:60px;line-height:1.1;font-weight:900;color:var(--navy)">${L('星门', 'GATE')}</div><div style="letter-spacing:7px;font-weight:700;color:var(--ink);font-size:14px;margin-bottom:12px">${L('星象师 · STARGAZER', 'GATE OF STARS · STARGAZER')}</div>
+    <p style="margin:4px auto;max-width:520px;font-weight:700;color:var(--ink);font-size:14px;line-height:1.7">${L('你站在环绕自己的星环中间，看不见旅人，却读得懂星图。拖拽转身，走向亮起的台子。', 'You stand inside a ring of orbits. You cannot see the Wanderer, but you can read the stars. Drag to turn; head for the console that glows.')}</p>
+    <button class="btn" id="rdy" ${s.ready.hq ? 'disabled' : ''}>${s.ready.hq ? L('已准备', 'READY ✓') : L('准备好了', 'READY')}</button>
+    <div class="stat"><i class="${s.present.phone ? 'on' : ''}"></i>${s.present.phone ? L('旅人已连线', 'Wanderer connected') : L('等待旅人连线…', 'Waiting for the Wanderer…')} ${s.ready.phone ? L('· 已准备', '· ready') : ''}</div></div>`;
+  $('#rdy').onclick = async () => { SFX.unlock(); SFX.click(); NET.act('ready'); };
+}
+function renderEnd() {
+  const s = S, won = s.phase === 'won', why = { alarm: L('警报响彻了星门。', 'The alarms woke the gate.'), time: L('黎明已至，星门未开。', 'Dawn came before the gate opened.') }[s.why] || '';
+  $('#end').innerHTML = `${wideArt(won ? 'won' : 'lost')}<div class="center"><div style="font-size:64px;line-height:1.1;font-weight:900;color:var(--navy)">${won ? L('黎明', 'DAWN') : L('天亮了', 'TOO LATE')}</div>
+    <div style="background:var(--cream);color:var(--ink);display:inline-flex;gap:30px;border-radius:18px;padding:12px 26px;font-weight:800;margin:10px 0 0">${won ? `<span><small>${L('用时', 'TIME')}</small><br><b style="font-size:24px;color:var(--navy)">${fmt(s.endAt - s.startAt)}</b></span><span><small>${L('警报', 'ALARMS')}</small><br><b style="font-size:24px;color:var(--orange)">${s.alarm}</b></span>` : `<span style="font-size:15px">${why}</span>`}</div><br><button class="btn" id="again">${L('再来一局 · AGAIN', 'PLAY AGAIN')}</button></div>`;
+  $('#again').onclick = () => NET.act('reset');
+}
+
+// ======================= 事件提示（互相切换星灯 / 星令 / 祭仪）=======================
+function toast(msg, ms = 2800) { const e = $('#toast'); e.textContent = msg; e.classList.add('on'); clearTimeout(ui.tt); ui.tt = setTimeout(() => e.classList.remove('on'), ms); }
+const evQ = []; let evBusy = false;   // 事件提示排队：同一刻来几条就依次显示
+function toastEv(m) { if (evQ.length < 4) evQ.push(m); if (!evBusy) nextEv(); }
+function nextEv() { const m = evQ.shift(); if (!m) { evBusy = false; return; } evBusy = true; toast(m, 1900); setTimeout(nextEv, 1950); }
+function handleEvents(s) {
+  if (ui.seenT === null || ui.seenT === undefined) { ui.seenT = s.events.length ? s.events[s.events.length - 1].t : 0; return; }
+  const fresh = s.events.filter(e => e.t > ui.seenT);
+  for (const e of fresh) {
+    if (e.k === 'toggle' && e.p.side === 'phone') { toastEv(EV.toggle(e.p)); SFX.pitch(e.p.idx + 2); }
+    else if (e.k === 'orderOK') { toastEv(EV.orderOK(e.p)); SFX.ok(); }
+    else if (e.k === 'orderNew' && e.p.who === 'hq') { toastEv(EV.orderNew(e.p)); SFX.tick(); }
+    else if (e.k === 'ritOK') { toastEv(EV.ritOK()); SFX.ok(); }
+    else if (e.k === 'ritNoChant') { toastEv(EV.ritNoChant()); SFX.bad(); }
+    else if (e.k === 'ritWeak') toastEv(EV.ritWeak());
+  }
+  if (fresh.length) ui.seenT = fresh[fresh.length - 1].t;
+}
+
+// ======================= 状态渲染 =======================
+function render(s) {
+  const prevStage = ui.lastStage; S = s; const playing = s.phase === 'playing', over = s.phase === 'won' || s.phase === 'lost';
+  $('#lobby').hidden = s.phase !== 'lobby'; if (s.phase === 'lobby') renderLobby();
+  $('#end').hidden = !over; if (over) { renderEnd(); closeFocus(); }
+  renderHUD(); refreshStations(); tickTimer(); handleEvents(s);
+  if (s.phase === 'playing' && s.startAt) { try { const key = 'intro:' + s.startAt; if (!sessionStorage.getItem(key)) { if (NET.now() >= s.startAt) sessionStorage.setItem(key, '1'); else if (!ui.introEl) { ui.introEl = KIT.intro('hq', () => { try { sessionStorage.setItem(key, '1'); } catch (_) {} ui.introEl = null; }); } } } catch (_) {} }
+  MUSIC.setMood((s.alarm >= cfg.maxAlarm - 1 || (s.phase === 'playing' && s.stage === 4 && s.nextHit - NET.now() > 0 && s.nextHit - NET.now() <= cfg.stormWarn)) ? 'tense' : 'calm');
+  if (s.alarm > ui.lastAlarm) { SFX.bad(); document.body.classList.remove('shake'); void document.body.offsetWidth; document.body.classList.add('shake'); } ui.lastAlarm = s.alarm;
+  if (s.phase === 'lobby' && ui.lastPhase && ui.lastPhase !== 'lobby') { closeFocus(); ui.lastStage = -1; ui.lastAlarm = 0; }
+  if (playing && s.stage !== prevStage) { ui.lastStage = s.stage; if (prevStage > 0) { SFX.ok(); closeFocus(); closeBook(); } }
+  if (!playing) ui.lastStage = -1;
+  if (ui.focus !== null) updateFocus();
+  ui.lastPhase = s.phase;
+}
+(async () => {
+  K.install(); cfg = await NET.init('hq'); buildLayers(); applyX(); loop();
+  NET.onConn(on => $('#conn').classList.toggle('on', on)); NET.onState(render);
+  MUSIC.role('hq'); const syncMus = () => $('#mus').classList.toggle('off', MUSIC.muted); syncMus(); $('#mus').onclick = () => { SFX.unlock(); MUSIC.toggle(); syncMus(); };
+  $('#lang').onclick = () => LANG.toggle();
+  document.addEventListener('langchange', () => { buildLayers(); if (S) { render(S); if (ui.focus !== null) { const k = ui.focus; closeFocus(); openFocus(k); } if (!$('#book').hidden) openBook(ui.tab); } });
+  window.addEventListener('resize', applyX); ui.x = XK(0) - pano.clientWidth / 2;
+  setInterval(tickTimer, 200);
+})();
+</script>
+</body>
+</html>
