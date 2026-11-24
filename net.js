@@ -1,7 +1,7 @@
 // 公共库：双语 L()、实时联网 NET、音效 SFX、空灵的宇宙感背景音乐 MUSIC
 (function () {
   // ---------- 双语 ----------
-  let lang = localStorage.getItem('lang') || 'zh';
+  let lang = localStorage.getItem('lang') || 'en';
   window.LANG = {
     get: () => lang,
     set(l) { lang = l; localStorage.setItem('lang', l); document.documentElement.lang = l; document.dispatchEvent(new Event('langchange')); },

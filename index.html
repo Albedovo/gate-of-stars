@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -142,7 +142,7 @@
 <script>
   const B = document.body, lang = document.getElementById('lang');
   const set = l => { B.classList.toggle('en', l === 'en'); document.documentElement.lang = l; lang.textContent = l === 'en' ? '中文' : 'EN'; try { localStorage.setItem('lang', l); } catch (_) {} };
-  let l0 = 'zh'; try { l0 = localStorage.getItem('lang') || (/^zh/i.test(navigator.language) ? 'zh' : 'en'); } catch (_) {} set(l0);
+  let l0 = 'en'; try { l0 = localStorage.getItem('lang') || 'en'; } catch (_) {} set(l0);
   lang.onclick = () => set(B.classList.contains('en') ? 'zh' : 'en');
   document.getElementById('go').onclick = () => { const f = document.createElement('iframe'); f.src = 'hq.html?demo'; f.allow = 'autoplay'; f.title = 'Gate of Stars — Stargazer demo'; document.getElementById('frame').replaceChildren(f); };
 </script>
