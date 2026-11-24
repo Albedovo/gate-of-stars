@@ -5,6 +5,11 @@ A two-player co-op puzzle: one on a **phone** (Wanderer), one on a **laptop** (S
 
 不需要任何额外硬件，没有摄像头，没有外部依赖。 No extra hardware, no camera, no external dependencies.
 
+## 在线体验 / Try it online
+
+无需安装：打开 `hq.html?demo`（部署在 GitHub Pages 上时自动进入展示模式），即可单人体验星象师视角，旅人由程序模拟。`index.html` 是作品集案例页。
+No install: open `hq.html?demo` (demo mode starts automatically on GitHub Pages) to try the Stargazer view solo — the Wanderer is simulated. `index.html` is the portfolio case study.
+
 ## 运行 / Run
 
 只需要 Python 3（标准库）。 Python 3 only (standard library).
@@ -40,6 +45,9 @@ All rules are decided on the server; each side only receives its own secrets.
 |---|---|
 | `server.py` | 静态文件 + 实时同步（SSE）+ 游戏状态与规则 |
 | `phone.html` | 旅人：多场景探索、场景谜题、祭坛手势 |
+| `index.html` | 作品集案例页（AI 协作过程 + 参考） |
+| `play.html` | 双人游玩说明 |
+| `demo.js` | 展示模式：浏览器内模拟服务器 + 旅人 |
 | `hq.html` | 星象师：第一人称 360° 全景观星台、各台特写、星图册 |
 | `kit.js` | 共用画风积木、双语名称、开场过场 |
 | `net.js` | 双语、联网、音效、程序生成的背景音乐 |

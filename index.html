@@ -3,22 +3,160 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>星门 / Gate of Stars</title>
+<title>星门 Gate of Stars · Case Study</title>
+<meta name="description" content="A two-player co-op puzzle (phone + laptop) designed and directed by me, built with AI. Highlights of the process and references.">
 <style>
-  body { margin: 0; padding: 40px 28px; background: #0a0a13; color: #f5eedd; font: 16px/1.9 "PingFang SC", Futura, sans-serif; min-height: 100vh; }
-  main { max-width: 620px; margin: auto; } h1 { letter-spacing: .3em; font-weight: 900; color: #f6d7a3; }
-  a { color: #f3bd46; } code { background: #14258f; padding: 2px 8px; border-radius: 6px; } li { margin: 8px 0; }
+  :root { --ink:#06060e; --navy:#0c1658; --blue:#1b3380; --sky:#4a7db0; --cream:#e8dfc7; --peach:#d9bd8a; --yellow:#eeb23a; --orange:#dc6b2c; --pink:#d397a9; --dust:#8a8574; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin:0; background:var(--ink); color:var(--cream); font:16px/1.75 "PingFang SC","Hiragino Sans GB",Futura,"Helvetica Neue",sans-serif; }
+  a { color:var(--yellow); }
+  .wrap { max-width:980px; margin:0 auto; padding:0 24px; }
+  .bar { position:sticky; top:0; z-index:10; background:#06060eec; border-bottom:2px solid #e8dfc722; backdrop-filter:blur(6px); }
+  .bar .wrap { display:flex; align-items:center; gap:18px; height:52px; font-weight:800; font-size:14px; }
+  .bar b { letter-spacing:.2em; color:var(--peach); margin-right:auto; }
+  .bar a { text-decoration:none; color:var(--cream); opacity:.8 } .bar a:hover { opacity:1; color:var(--yellow) }
+  .lang { border:2px solid var(--cream); background:none; color:var(--cream); border-radius:14px; padding:2px 12px; font:800 12px inherit; cursor:pointer; }
+  /* hero */
+  .hero { position:relative; overflow:hidden; padding:84px 0 64px; border-bottom:6px solid var(--navy);
+    background: linear-gradient(135deg,#0c165888 25%,transparent 25%) -40px 0/80px 80px, linear-gradient(225deg,#0c165888 25%,transparent 25%) -40px 0/80px 80px, linear-gradient(315deg,#0c165888 25%,transparent 25%) 0 0/80px 80px, linear-gradient(45deg,#0c165888 25%,transparent 25%) 0 0/80px 80px, var(--ink); }
+  .hero .kicker { letter-spacing:.35em; font-weight:800; color:var(--peach); font-size:13px; }
+  .hero h1 { font-size:clamp(46px,9vw,92px); line-height:1.05; margin:10px 0 6px; font-weight:900; color:var(--cream); }
+  .hero h1 i { font-style:normal; color:var(--yellow); }
+  .hero p.lead { max-width:640px; font-size:19px; font-weight:600; margin:14px 0 26px; }
+  .btn { display:inline-block; background:var(--yellow); color:var(--ink); font-weight:900; text-decoration:none; border-radius:28px; padding:12px 28px; border:3px solid var(--ink); box-shadow:4px 4px 0 var(--orange); margin:0 12px 12px 0; }
+  .btn.ghost { background:none; color:var(--cream); border-color:var(--cream); box-shadow:none; }
+  .meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin-top:34px; }
+  .meta div { border-left:4px solid var(--orange); padding-left:12px; font-size:14px; } .meta small { display:block; color:var(--dust); font-weight:800; letter-spacing:.12em; }
+  /* sections */
+  section { padding:64px 0 8px; }
+  h2 { font-size:30px; margin:0 0 6px; font-weight:900; } h2 small { display:block; font-size:12px; letter-spacing:.3em; color:var(--orange); margin-bottom:4px; }
+  .sub { color:var(--dust); margin:0 0 24px; font-weight:600; }
+  .card { background:#0c1658aa; border:3px solid #e8dfc733; border-radius:20px; padding:18px 22px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; } .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  @media(max-width:760px){ .grid2,.grid3 { grid-template-columns:1fr; } }
+  .card h3 { margin:0 0 6px; font-size:17px; color:var(--yellow); } .card p { margin:4px 0; font-size:15px; }
+  /* demo frame */
+  .frame { position:relative; border:4px solid var(--cream); border-radius:22px; overflow:hidden; aspect-ratio:16/10; background:var(--navy); box-shadow:8px 8px 0 var(--orange); }
+  .frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .frame .go { position:absolute; inset:0; display:grid; place-items:center; text-align:center; cursor:pointer; background:radial-gradient(circle,#1b338066,#06060eee); border:0; color:var(--cream); font:inherit; width:100%; }
+  .frame .go b { font-size:26px; display:block; color:var(--yellow); } .frame .go span { font-weight:700; opacity:.85; }
+  /* timeline */
+  .steps { counter-reset:s; display:grid; gap:18px; }
+  .step { position:relative; padding:18px 22px 18px 74px; background:#0c165899; border:3px solid #e8dfc733; border-radius:20px; }
+  .step::before { counter-increment:s; content:counter(s); position:absolute; left:20px; top:16px; width:38px; height:38px; display:grid; place-items:center; border-radius:50%; background:var(--yellow); color:var(--ink); font-weight:900; }
+  .step h3 { margin:0 0 4px; font-size:18px; } .step p { margin:3px 0; font-size:15px; }
+  .tag { display:inline-block; font-size:12px; font-weight:800; border-radius:12px; padding:0 10px; margin-right:6px; background:var(--cream); color:var(--ink); }
+  .tag.ai { background:var(--sky); } .tag.me { background:var(--orange); }
+  /* references */
+  .refs { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; } .refs img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:12px; border:3px solid var(--cream); }
+  @media(max-width:760px){ .refs { grid-template-columns:repeat(3,1fr); } }
+  table { width:100%; border-collapse:collapse; font-size:14.5px; } th,td { text-align:left; padding:9px 12px; border-bottom:2px solid #e8dfc722; vertical-align:top; } th { color:var(--peach); font-size:12px; letter-spacing:.15em; }
+  td:first-child { font-weight:800; white-space:nowrap; }
+  .fix li { margin:4px 0; } ul { padding-left:20px; margin:6px 0; }
+  .quote { border-left:5px solid var(--orange); padding:4px 0 4px 16px; font-size:18px; font-weight:700; margin:18px 0; }
+  footer { padding:56px 0 70px; color:var(--dust); font-size:13px; text-align:center; }
+  body:not(.en) .en { display:none; } body.en .zh { display:none; } body.en span.en, body.en b.en, body.en small.en { display:inline; }
 </style>
 </head>
-<body><main>
-<h1>星门 · GATE OF STARS</h1>
-<p>双人协作解谜 · 手机（旅人）+ 电脑（星象师）· 约 8 分钟<br>Two-player co-op · phone (Wanderer) + laptop (Stargazer) · ~8 min</p>
-<ol>
-  <li>先在终端启动服务器 / Start the server: <code>python3 server.py</code></li>
-  <li>电脑 / Laptop → <a href="hq.html">hq.html</a>（星象师 Stargazer，拖拽转身 / drag to look around）</li>
-  <li>手机 / Phone → <code>http://&lt;电脑局域网 IP&gt;:8000/phone.html</code>（旅人 Wanderer）</li>
-  <li>两边都点「准备好了」即开始。不要看对方的屏幕。 / Both press Ready. Don't look at each other's screen.</li>
-</ol>
-<p>六关 / Six trials：描星 · 对称门 · 星环月相 · 调频校准 · 星令传递 · 星钥匙</p>
-</main></body>
+<body>
+<div class="bar"><div class="wrap"><b>GATE OF STARS</b><a href="#play"><span class="zh">试玩</span><span class="en">Play</span></a><a href="#process"><span class="zh">过程</span><span class="en">Process</span></a><a href="#refs"><span class="zh">参考</span><span class="en">References</span></a><a href="#reflect"><span class="zh">反思</span><span class="en">Reflection</span></a><button class="lang" id="lang">EN</button></div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">CASE STUDY · HELLO WORLD · SVA</div>
+  <h1>星门<br><i>Gate of Stars</i></h1>
+  <p class="lead zh">一个只有两个人才玩得起来的双人合作解谜：一人用手机当旅人探索星门厅，一人用电脑当星象师。看不到对方的屏幕，只能靠说话配合。我负责设计与导演，AI 负责实现与自测。</p>
+  <p class="lead en">A co-op puzzle that only works with two people: one explores the gate hall on a phone as the Wanderer, the other reads the stars on a laptop as the Stargazer. Neither can see the other’s screen — they have to talk. I designed and directed; AI built and self-tested.</p>
+  <a class="btn" href="#play"><span class="zh">▶ 直接体验星象师视角</span><span class="en">▶ Try the Stargazer view</span></a>
+  <a class="btn ghost" href="https://github.com/Albedovo/gate-of-stars" target="_blank" rel="noopener">GitHub</a>
+  <div class="meta">
+    <div><small>ROLE</small><span class="zh">游戏设计 · 创意导演 · 试玩测试</span><span class="en">Game design · direction · playtesting</span></div>
+    <div><small>WITH AI</small><span class="zh">Claude 负责写代码、做自动化测试</span><span class="en">Claude writes the code and runs automated tests</span></div>
+    <div><small>STACK</small><span class="zh">纯 HTML / SVG / JS · Python 标准库服务器 · 无外部依赖</span><span class="en">Plain HTML/SVG/JS · stdlib Python server · zero dependencies</span></div>
+    <div><small>TIME</small><span class="zh">课程期末，约 3 周内</span><span class="en">Course final, ~3 weeks</span></div>
+  </div>
+</div></header>
+
+<section id="play"><div class="wrap">
+  <h2><small>PLAY</small><span class="zh">点一下就能玩</span><span class="en">Click and play</span></h2>
+  <p class="sub zh">完整游戏需要手机 + 电脑两个人。这里是星象师的视角：拖拽转身，点任意台子进入；旅人由程序模拟，会告诉你他“正在说什么”。</p>
+  <p class="sub en">The full game needs two people. This is the Stargazer’s side: drag to look around, click any console. The Wanderer is simulated and shows what they would be saying.</p>
+  <div class="frame" id="frame"><button class="go" id="go"><div><b class="zh">▶ 点击开始</b><b class="en">▶ Click to start</b><span class="zh">建议用电脑打开，带声音 ♪</span><span class="en">Best on a laptop, sound on ♪</span></div></button></div>
+  <p style="margin-top:14px"><a href="hq.html?demo" target="_blank" rel="noopener"><span class="zh">在新窗口全屏打开 ↗</span><span class="en">Open full screen ↗</span></a></p>
+</div></section>
+
+<section id="process"><div class="wrap">
+  <h2><small>PROCESS</small><span class="zh">我是怎么和 AI 一起做出来的</span><span class="en">How I made it with AI</span></h2>
+  <p class="sub zh">只放重点。<span class="tag me">我</span> = 我做的决定，<span class="tag ai">AI</span> = AI 做的执行。</p>
+  <p class="sub en">Highlights only. <span class="tag me">ME</span> = my decisions, <span class="tag ai">AI</span> = AI execution.</p>
+  <div class="steps">
+    <div class="step"><h3 class="zh">选题：先发散，再用约束砍掉</h3><h3 class="en">Pick the idea: diverge, then cut with constraints</h3>
+      <p class="zh"><span class="tag ai">AI</span>一轮轮给出方向；我连续否掉“不好玩”“不适合求职”“和现成工具没区别”的。又拿另一个模型的答案做对照。</p>
+      <p class="zh"><span class="tag me">我</span>最后留下：双人合作 + 手机与电脑各看到不同信息。理由是——必须说话才能过关，这才是“两个人”的意义。</p>
+      <p class="en"><span class="tag ai">AI</span> proposed directions round after round; I kept rejecting ones that weren’t fun, weren’t portfolio-worthy, or duplicated existing tools — and cross-checked against another model’s answer.</p>
+      <p class="en"><span class="tag me">ME</span> I kept co-op with asymmetric info on phone and laptop: if you can’t pass without talking, two players actually matter.</p></div>
+    <div class="step"><h3 class="zh">给参考：只借“操作方式”，不借“画风”</h3><h3 class="en">References: borrow the interaction, not the art</h3>
+      <p class="zh"><span class="tag me">我</span>给的玩法参考：《Keep Talking and Nobody Explodes》（滴答滴答）、《We Were Here》、《Spaceteam》、《Operation: Tango》，以及锈湖的点击探索操作。</p>
+      <p class="zh"><span class="tag me">我</span>第一版出来后我纠正：“我只是让你模仿锈湖的<b>操作模式</b>，不要照搬画风。”然后给了 5 张抽象画风图（菱形格、云、彩点、蜡笔质感）。</p>
+      <p class="en"><span class="tag me">ME</span> Gameplay references: Keep Talking and Nobody Explodes, We Were Here, Spaceteam, Operation: Tango, plus Rusty Lake’s point-and-explore interaction.</p>
+      <p class="en"><span class="tag me">ME</span> After v1 I corrected it: “I only asked you to imitate Rusty Lake’s <b>interaction</b>, not its art.” Then I supplied 5 abstract style images (harlequin diamonds, clouds, dots, crayon grain).</p></div>
+    <div class="step"><h3 class="zh">先过目，再开工：设计评审关卡</h3><h3 class="en">Review gate: mockups before code</h3>
+      <p class="zh"><span class="tag me">我</span>规定 AI 必须先出主页面和关卡内截图的设计稿给我看，点头后才改游戏。</p>
+      <p class="zh"><span class="tag ai">AI</span>产出 UI 概念稿；我否掉了“最终对照灯光”这类无聊环节，保留限时任务；同时要求星象师不能一直停在一个页面——于是有了“站在星环中间、可拖拽 360° 全景”的第一人称观星台。</p>
+      <p class="en"><span class="tag me">ME</span> AI had to show UI mockups (home + in-level) and get my approval before touching the game.</p>
+      <p class="en"><span class="tag ai">AI</span> produced the concepts; I cut the dull “light matching” finale, kept timed tasks, and asked that the Stargazer never sit on one screen — hence the first-person, drag-to-look 360° observatory.</p></div>
+    <div class="step"><h3 class="zh">三轮试玩，每轮都是具体的修改</h3><h3 class="en">Three playtest rounds, each with concrete fixes</h3>
+      <ul class="fix zh">
+        <li><b>第一轮：</b>完成一关后全景自己狂转 → 修 bug、取消自动旋转；去掉摄像头/二维码，改成手机上的祭坛手势；时间给得太紧 → 13 分钟、4 次警报；月相不再给名字，只给符号；手机一直在同一个场景 → 做成多房间探索。</li>
+        <li><b>第二轮：</b>提示挡住火种和月盘 → 挪到顶部并淡出；台子和房间同名，并标出“旅人在此”；整体太亮、眼睛疼 → 压暗配色；加入程序生成的空灵背景音乐。</li>
+        <li><b>第三轮：</b>第五关怎么也玩不了 → 找到手机端轮盘没有可点击区域、计时在手机能操作前就开始，修掉；加入 21 秒开场过场暗示背景。</li>
+      </ul>
+      <ul class="fix en">
+        <li><b>Round 1:</b> panorama spun wildly after a trial → bug fixed, no auto-rotate; camera/QR removed for phone altar gestures; timing too tight → 13 min, 4 alarms; moon phases shown as symbols only; phone stuck in one scene → multi-room exploration.</li>
+        <li><b>Round 2:</b> hints covered the flame/moon → moved to top and fading; consoles and rooms share names with a “Wanderer is here” marker; too bright → dimmed palette; added generated ambient music.</li>
+        <li><b>Round 3:</b> stage 5 unplayable → the phone dial had no tap area and timers started before the phone could act; fixed. Added a 21 s opening cutscene.</li>
+      </ul></div>
+    <div class="step"><h3 class="zh">让 AI 自己当测试员</h3><h3 class="en">AI as its own tester</h3>
+      <p class="zh"><span class="tag ai">AI</span>写了模拟“两个玩家”的脚本，把规则（警报、风暴、星令超时、祭仪）全部跑一遍；再用浏览器真实点击去验证界面。</p>
+      <p class="zh">关键教训：脚本触发的事件会<b>掩盖</b>真实点击才会暴露的 bug（面板每 0.2 秒重绘导致点击丢失、按钮没有填充点击区）——所以最后一定要真点。</p>
+      <p class="en"><span class="tag ai">AI</span> wrote scripts that simulate both players and exercise every rule (alarms, storms, order timeouts, the ritual), then verified the UI with real browser clicks.</p>
+      <p class="en">Key lesson: scripted events <b>hide</b> bugs that only real clicks reveal (a panel re-rendering every 200 ms ate clicks; a button had no hit area) — always finish with real clicks.</p></div>
+  </div>
+</div></section>
+
+<section id="refs"><div class="wrap">
+  <h2><small>REFERENCES</small><span class="zh">我给 AI 的参考</span><span class="en">What I gave the AI</span></h2>
+  <div class="refs"><img src="assets/1.webp" alt="style reference 1" loading="lazy"><img src="assets/2.webp" alt="style reference 2" loading="lazy"><img src="assets/3.webp" alt="style reference 3" loading="lazy"><img src="assets/4.webp" alt="style reference 4" loading="lazy"><img src="assets/5.webp" alt="style reference 5" loading="lazy"></div>
+  <p class="sub zh" style="margin-top:10px">画风：我自己找的 5 张图 → 深海军蓝/黑色菱形格、奶油色云、橙黄天蓝粉的圆点、四角星、蜡笔颗粒。</p>
+  <p class="sub en" style="margin-top:10px">Visual style: 5 images I collected → deep navy/black harlequin, cream clouds, orange/yellow/sky/pink dots, four-point stars, crayon grain.</p>
+  <div class="card" style="margin-top:14px"><table>
+    <tr><th>REFERENCE</th><th><span class="zh">我取了什么</span><span class="en">What I took</span></th></tr>
+    <tr><td>Keep Talking and Nobody Explodes</td><td><span class="zh">一人看得见、一人看手册，必须靠说话；限时压力</span><span class="en">One sees, one has the manual — talk to progress; timed pressure</span></td></tr>
+    <tr><td>We Were Here</td><td><span class="zh">两人在不同房间，各自拿着对方缺的信息</span><span class="en">Two players in separate rooms, each holding what the other lacks</span></td></tr>
+    <tr><td>Spaceteam</td><td><span class="zh">互相喊对方面板上的名字（第 5 关星令传递）</span><span class="en">Shouting names on each other’s panels (trial 5)</span></td></tr>
+    <tr><td>Operation: Tango</td><td><span class="zh">不对称的双人分工与实时配合</span><span class="en">Asymmetric roles with real-time coordination</span></td></tr>
+    <tr><td>Rusty Lake</td><td><span class="zh">只取点击探索 + 场景内小谜题的<b>操作方式</b>，不取画风</span><span class="en">Only the point-and-explore interaction and in-scene puzzles — <b>not</b> the art</span></td></tr>
+  </table></div>
+</div></section>
+
+<section id="reflect"><div class="wrap">
+  <h2><small>REFLECTION</small><span class="zh">我学到的</span><span class="en">What I learned</span></h2>
+  <div class="grid3">
+    <div class="card"><h3 class="zh">AI 做得快，方向在我</h3><h3 class="en">AI is fast; direction is mine</h3><p class="zh">每一次“方向可以”或“不对劲”都是我给的。参考图和纠正比任何长提示都有效。</p><p class="en">Every “yes, that direction” or “that feels wrong” came from me. References and corrections beat any long prompt.</p></div>
+    <div class="card"><h3 class="zh">先评审，再实现</h3><h3 class="en">Review before build</h3><p class="zh">让 AI 先出设计稿并过目，省掉了大量返工。</p><p class="en">Making AI show mockups first saved a lot of rework.</p></div>
+    <div class="card"><h3 class="zh">真人试玩不可替代</h3><h3 class="en">Real playtests can’t be replaced</h3><p class="zh">三轮试玩暴露的问题，AI 自测都没发现：时间太紧、提示挡住物体、眼睛疼。</p><p class="en">Three playtests found what AI self-tests didn’t: tight timing, hints covering objects, eye strain.</p></div>
+  </div>
+  <p class="quote zh">已知局限：还没在真实手机上做完整试玩；手机陀螺仪需要 HTTPS，所以祭坛以触摸手势为主。</p>
+  <p class="quote en">Known limits: not yet fully playtested on a real phone; gyroscope needs HTTPS, so the altar uses touch gestures first.</p>
+  <p><a class="btn" href="hq.html?demo" target="_blank" rel="noopener"><span class="zh">▶ 全屏试玩</span><span class="en">▶ Play full screen</span></a><a class="btn ghost" href="play.html"><span class="zh">如何双人游玩</span><span class="en">How to play with two</span></a><a class="btn ghost" href="https://github.com/Albedovo/gate-of-stars" target="_blank" rel="noopener">GitHub</a></p>
+</div></section>
+<footer>Gate of Stars · SVA Hello World · 2026</footer>
+<script>
+  const B = document.body, lang = document.getElementById('lang');
+  const set = l => { B.classList.toggle('en', l === 'en'); document.documentElement.lang = l; lang.textContent = l === 'en' ? '中文' : 'EN'; try { localStorage.setItem('lang', l); } catch (_) {} };
+  let l0 = 'zh'; try { l0 = localStorage.getItem('lang') || (/^zh/i.test(navigator.language) ? 'zh' : 'en'); } catch (_) {} set(l0);
+  lang.onclick = () => set(B.classList.contains('en') ? 'zh' : 'en');
+  document.getElementById('go').onclick = () => { const f = document.createElement('iframe'); f.src = 'hq.html?demo'; f.allow = 'autoplay'; f.title = 'Gate of Stars — Stargazer demo'; document.getElementById('frame').replaceChildren(f); };
+</script>
+</body>
 </html>

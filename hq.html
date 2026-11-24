@@ -89,6 +89,7 @@
 
 <script src="net.js"></script>
 <script src="kit.js"></script>
+<script>if (/[?&]demo\b/.test(location.search) || /github\.io$/.test(location.hostname)) document.write('<script src="demo.js"><\/script>');</script>
 <script>
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const K = KIT, C = K.C, N = K.N, params = new URLSearchParams(location.search);
@@ -150,6 +151,7 @@ function markAt() { if (!S) return; const at = ({ gallery: 0, mirror: 1, moon: 2
 function refreshStations() { markAt();
   if (!S) return;
   const playing = S.phase === 'playing', won = S.phase === 'won';
+  if (S.demo) { for (let k = 0; k < 6; k++) $$('.st' + k).forEach(e => { e.classList.add('on'); e.classList.remove('done', 'locked'); }); return; }
   for (let k = 0; k < 6; k++) $$('.st' + k).forEach(e => { e.classList.toggle('on', playing && S.stage === k + 1); e.classList.toggle('done', won || (S.stage > k + 1 && S.phase !== 'lobby')); e.classList.toggle('locked', !won && S.stage < k + 1); });
 }
 const wrapD = d => ((d % SW) + SW + SW / 2) % SW - SW / 2;
@@ -194,7 +196,7 @@ const FEN = ['STAR TABLE', 'MIRROR STELES', 'ORRERY', 'TUNING CONSOLE', 'ORDER C
 function openFocus(k) {
   if (!S || S.phase !== 'playing') return;
   ui.focus = k; ui.fsig = null; SFX.click(); const el = $('#focus'); el.hidden = false;
-  el.innerHTML = `<div class="fcard"><div class="fhead"><div><h2>${FTITLE(k)}</h2><div class="en">${FEN[k]}</div></div><button class="btn ghost back" id="fback">${L('← 返回全景', '← BACK TO PANORAMA')}</button></div><div id="fbody"></div></div>`;
+  el.innerHTML = `<div class="fcard"><div class="fhead"><div><h2>${FTITLE(k)}</h2><div class="en">${FEN[k]}</div></div><button class="btn ghost back" id="fback">${L('← 返回全景', '← BACK TO PANORAMA')}</button></div><div id="dnote" class="demonote"></div><div id="fbody"></div></div>`;
   $('#fback').onclick = closeFocus; buildFocus(); NET.act('view', { i: k });
 }
 function closeFocus() {
@@ -205,12 +207,25 @@ const sleeping = () => `<div class="fbody"><div class="side" style="text-align:c
 const finished = () => `<div class="fbody"><div class="side" style="text-align:center;max-width:440px"><div class="big">✓ ${L('已点亮', 'Lit')}</div><p class="msg">${L('这一关已经完成了。转身去下一座台子。', 'This trial is complete. Turn to the next console.')}</p></div></div>`;
 function buildFocus() {
   const k = ui.focus; if (k === null) return; const body = $('#fbody'); if (!body) return;
-  if (S.stage < k + 1) { body.innerHTML = sleeping(); return; }
-  if (S.stage > k + 1 && S.phase !== 'won') { body.innerHTML = finished(); return; }
-  ([focusTrace, focusMirror, focusOrrery, focusTune, focusOrders, focusRitual][k])(body);
+  if (!S.demo && S.stage < k + 1) { body.innerHTML = sleeping(); return; }
+  if (!S.demo && S.stage > k + 1 && S.phase !== 'won') { body.innerHTML = finished(); return; }
+  ([focusTrace, focusMirror, focusOrrery, focusTune, focusOrders, focusRitual][k])(body); demoNote();
+}
+// 展示模式：替"旅人"开口，告诉观众他此刻会说什么
+function demoNote() {
+  const k = ui.focus, el = $('#dnote'); if (!S || !S.demo || !el || k === null) return; const I = S.info, T = S.tokens;
+  const sv = (inner, w = 40) => `<svg width="${w}" height="40" viewBox="-20 -20 40 40" style="vertical-align:middle">${inner}</svg>`;
+  let h = '';
+  if (k === 0) { const t = T[I.nextToken]; h = `${L('旅人正在描述', 'The Wanderer describes')} ${t ? sv(K.token(t.shape, t.color, 0, 0, 15)) : ''} ${L('——在图上点它', '— tap it on the chart')}`; }
+  else if (k === 1) h = `${L('旅人的瓷片', 'Wanderer’s tiles')} ${I.tilesL.map((v, i) => sv(K.comet(v, 0, 0, 34, I.lockedL[i]))).join('')} ${L('· 把你的转成它们的镜像', '· turn yours to mirror them')}`;
+  else if (k === 2) h = `${L('旅人报出三个月相', 'The Wanderer reads 3 moon phases')} ${I.phases.map(p => sv(K.moon(p, 0, 0, 14))).join('')} ${L('· 去星图册查对应符号', '· look up the symbols in the Star Book')}`;
+  else if (k === 3) { const [x, y] = I.star, d = Math.hypot(x, y), cl = Math.min(1, .75 / Math.max(d, .01)); h = `${L('旅人看到的星', 'The Wanderer’s star')} <svg width="46" height="46" viewBox="-23 -23 46 46" style="vertical-align:middle"><circle r="20" fill="none" stroke="${C.ink}" stroke-width="2.5"/><circle r="4" fill="none" stroke="${C.ink}" stroke-width="1.5"/><circle cx="${x * cl * 18}" cy="${-y * cl * 18}" r="5" fill="${C.orange}"/></svg> ${d < .2 ? L('已在中心，保持！', 'centered — hold it!') : L('偏离中心——转旋钮，注意方向反直觉', 'off-center — turn the knobs; directions are counter-intuitive')}`; }
+  else if (k === 4) { const o = I.orderF; h = o ? `${L('旅人在喊：把', 'The Wanderer calls: ')}【${N.ctrlH(o.idx)}】${S.mine.ctrl[o.idx] === o.target ? '✓' : L(o.target ? '点亮' : '熄灭', o.target ? ' light it' : ' dim it')}` : ''; h += ` · ${L('你屏幕上方的星令，虚拟旅人会照做', 'the Wanderer carries out your order automatically')}`; }
+  else h = L('虚拟旅人每几秒在祭坛上做一步。♪ 步骤要在他动手时按住「吟唱」，否则祭器沉默。', 'The simulated Wanderer acts every few seconds. Hold “Chant” on ♪ steps or the relic stays silent.');
+  el.innerHTML = `<small>DEMO · ${L('旅人那边', 'ON THE PHONE')}</small>${h}`;
 }
 function updateFocus() {
-  const k = ui.focus; if (k === null || !$('#fbody')) return; if (S.stage !== k + 1) { ui.fsig = null; return buildFocus(); }
+  const k = ui.focus; if (k === null || !$('#fbody')) return; demoNote(); if (!S.demo && S.stage !== k + 1) { ui.fsig = null; return buildFocus(); }
   // 只有相关数据变了才重绘，避免鼠标按下和松开之间按钮被替换导致点击丢失
   const ev = S.events.length ? S.events[S.events.length - 1].t : 0, m = S.mine;
   const sg = JSON.stringify([[m.done, S.traceIdx], [m.tiles, S.sym], [m.ringRot, S.rings], [m.knob, S.stableSince, S.shield, Math.floor(S.nextHit)], [m.ctrl, m.order && m.order.idx, m.order && m.order.deadline, S.okF, S.okH, S.armed, ev], [S.ritIdx, m.ritual]][k]);
@@ -334,7 +349,7 @@ function updRitual() {
 const BOOK = () => [L('总览', 'Overview'), L('星点图例', 'Stars'), L('月相对照', 'Moon cipher'), L('镜像规则', 'Mirror'), L('风暴与护盾', 'Storm'), L('星令', 'Orders')];
 function bookPage(i) {
   const m = S && S.mine, ln = (a, b) => `<p class="msg">${L(a, b)}</p>`;
-  if (i === 0) return `<h3>${L('六道关卡', 'The six trials')}</h3>${[1, 2, 3, 4, 5, 6].map(n => `<p class="msg"><b>${n}. ${N.stage(n)}</b> — ${[L('旅人描述星的顺序，你在星图桌上依次点中。', 'The Wanderer describes the order; you tap the stars.'), L('转动你的瓷片，和旅人互为镜像。', 'Turn your tiles to mirror theirs.'), L('他报月相，你查对照表，转星环。', 'They read moon phases; you look up the cipher and turn rings.'), L('你转旋钮，他看星漂移。风暴时按住护盾。', 'You turn knobs; they watch the star drift. Hold the shield in storms.'), L('互相喊对方面板上的星名。', 'Call out star names on each other’s panels.'), L('把星钥匙举给摄像头。', 'Show the star key to the camera.')][n - 1]}</p>`).join('')}`;
+  if (i === 0) return `<h3>${L('六道关卡', 'The six trials')}</h3>${[1, 2, 3, 4, 5, 6].map(n => `<p class="msg"><b>${n}. ${N.stage(n)}</b> — ${[L('旅人描述星的顺序，你在星图桌上依次点中。', 'The Wanderer describes the order; you tap the stars.'), L('转动你的瓷片，和旅人互为镜像。', 'Turn your tiles to mirror theirs.'), L('他报月相，你查对照表，转星环。', 'They read moon phases; you look up the cipher and turn rings.'), L('你转旋钮，他看星漂移。风暴时按住护盾。', 'You turn knobs; they watch the star drift. Hold the shield in storms.'), L('互相喊对方面板上的星名。', 'Call out star names on each other’s panels.'), L('念出卷轴上的步骤，♪ 步骤按住吟唱。', 'Read the scroll aloud; hold the chant on ♪ steps.')][n - 1]}</p>`).join('')}`;
   if (i === 1) return `<h3>${L('本局的 7 颗星', 'This round’s 7 stars')}</h3><svg viewBox="0 0 520 90" width="100%">${(S ? S.tokens : []).map((t, j) => K.token(t.shape, t.color, 36 + j * 72, 44, 20)).join('')}</svg>${ln('只有图形，没有名字——怎么描述它们，由你和旅人商量。', 'Shapes only, no names — agree with the Wanderer on how to describe them.')}`;
   if (i === 2) return `<h3>${L('月相 → 符号', 'Moon phase → symbol')}</h3><svg viewBox="0 0 520 250" width="100%">${[0, 1, 2, 3, 4, 5].map(p => { const x = 20 + (p % 3) * 170, y = 14 + Math.floor(p / 3) * 120; return `<rect x="${x}" y="${y}" width="160" height="106" rx="14" fill="none" stroke="${C.navy}" stroke-width="3"/>${K.moon(p, x + 42, y + 53, 28)}<path d="M${x + 82} ${y + 53}h26" stroke="${C.ink}" stroke-width="3"/><path d="M${x + 102} ${y + 46}l8 7l-8 7" fill="none" stroke="${C.ink}" stroke-width="3"/>${m ? K.glyph(m.cipher[p], x + 130, y + 53, 16, C.orange, `stroke="${C.ink}" stroke-width="2.5" stroke-linejoin="round"`) : ''}`; }).join('')}</svg>${ln('只有符号，没有名字——你得自己想办法把它描述给旅人。', 'Symbols only, no names — find your own words to describe them.')}`;
   if (i === 3) return `<h3>${L('镜像规则', 'Mirror rule')}</h3><svg viewBox="0 0 520 130" width="100%">${[[0, 1], [3, 2]].map(([a, b], j) => `${K.comet(a, 90 + j * 250, 60, 80, false)}<text x="${150 + j * 250}" y="66" text-anchor="middle" font-size="26" font-weight="900" fill="${C.ink}">↔</text>${K.comet(b, 210 + j * 250, 60, 80, false)}`).join('')}</svg>${ln('你的每块瓷片，都要和旅人同位置的那块互为左右镜像。', 'Each of your tiles must be the left-right mirror of the Wanderer’s tile in the same slot.')}`;
@@ -364,18 +379,20 @@ function renderHUD() {
   $('#ttl').textContent = L('星象师 · STARGAZER', 'STARGAZER'); $('#lang').textContent = LANG.get() === 'zh' ? 'EN' : '中文'; $('#tmL').textContent = L('距离黎明', 'UNTIL DAWN');
   $('#dots').innerHTML = [...Array(cfg.maxAlarm)].map((_, i) => `<i class="${i < S.alarm ? 'on' : ''}"></i>`).join(''); $('#sun').innerHTML = K.star4(0, 0, 12, C.yellow, .22, `stroke="${C.ink}" stroke-width="1.5"`);
   $('#bookBtn').textContent = L('📖 星图册', '📖 STAR BOOK');
-  $('#compass').innerHTML = [0, 1, 2, 3, 4, 5].map(k => `<button class="chip ${S.phase === 'playing' && S.stage === k + 1 ? 'act' : ''} ${S.stage > k + 1 || S.phase === 'won' ? 'done' : ''} ${S.stage < k + 1 ? 'lock' : ''}" data-k="${k}"><i><b>${S.stage > k + 1 || S.phase === 'won' ? '✓' : k + 1}</b></i><span>${FTITLE(k)}<small>↔ ${N.room(k)}</small></span></button>`).join('');
+  const DM = !!S.demo;
+  $('#compass').innerHTML = [0, 1, 2, 3, 4, 5].map(k => DM ? `<button class="chip" data-k="${k}"><i><b>${k + 1}</b></i><span>${FTITLE(k)}<small>↔ ${N.room(k)}</small></span></button>` : `<button class="chip ${S.phase === 'playing' && S.stage === k + 1 ? 'act' : ''} ${S.stage > k + 1 || S.phase === 'won' ? 'done' : ''} ${S.stage < k + 1 ? 'lock' : ''}" data-k="${k}"><i><b>${S.stage > k + 1 || S.phase === 'won' ? '✓' : k + 1}</b></i><span>${FTITLE(k)}<small>↔ ${N.room(k)}</small></span></button>`).join('');
   $$('.chip').forEach(c => c.onclick = () => gotoStation(+c.dataset.k));
   const L2 = LOCN(); $('#loc').innerHTML = `<svg width="34" height="34" viewBox="-17 -17 34 34">${K.diamond(0, 0, 30, 30, C.orange, `stroke="${C.cream}" stroke-width="2.5"`)}${K.dot(0, 0, 4, C.ink)}</svg><div><small>${L('旅人在', 'WANDERER AT')}</small>${L2[S.loc] || L2.hall}</div>`;
   const evs = [...S.events].reverse().slice(0, 3); $('#notes').innerHTML = evs.map(e => `<div>${EV[e.k] ? EV[e.k](e.p || {}) : e.k}</div>`).join('');
   $('#arrL').innerHTML = `◀ <span>${FTITLE(Math.max(0, Math.min(5, S.stage - 1)))}</span>`; $('#arrR').innerHTML = `<span>${FTITLE(Math.max(0, Math.min(5, S.stage - 1)))}</span> ▶`;
   const k = S.stage - 1, n = nearest(); $('#hint').innerHTML = S.phase !== 'playing' ? '' : S.stage >= 1 && S.stage <= 6 ? `${L('第', 'Trial ')} ${S.stage}${L(' 关', '')} · <b>${N.stage(S.stage)}</b> — ${n.k === k && n.d < 130 ? L('点击台子进入', 'click the console to enter') : L(`转身去【${FTITLE(k)}】`, `turn to the [${FTITLE(k)}]`)}` : '';
   $('#hint').style.display = S.phase === 'playing' && S.stage >= 1 ? '' : 'none';
+  if (DM) { $('#hint').innerHTML = L('<b>拖拽</b>转身 · 点击任意台子进入 · 数字键 1–6 跳转', '<b>Drag</b> to turn · click any console · keys 1–6 jump'); $('#hint').style.display = ''; }
 }
 function tickTimer() {
   if (!S) return; let rem = cfg.limit; if (S.startAt) rem = Math.min(cfg.limit, cfg.limit - ((S.endAt || NET.now()) - S.startAt));
-  $('#tm').textContent = fmt(rem); const p = Math.max(0, Math.min(1, 1 - rem / cfg.limit)); $('#fill').style.width = p * 100 + '%'; $('#sun').style.left = p * 100 + '%'; $('#tm').style.color = S.phase === 'playing' && rem <= 60 ? C.orange : '';
-  const warn = S.nextHit - NET.now(), w = S.phase === 'playing' && S.stage === 4 && warn > 0 && warn <= cfg.stormWarn; pano.classList.toggle('storm', !!w);
+  $('#tm').textContent = S.demo ? '∞' : fmt(rem); if (S.demo) rem = cfg.limit; const p = Math.max(0, Math.min(1, 1 - rem / cfg.limit)); $('#fill').style.width = p * 100 + '%'; $('#sun').style.left = p * 100 + '%'; $('#tm').style.color = S.phase === 'playing' && rem <= 60 ? C.orange : '';
+  const warn = S.nextHit - NET.now(), w = S.phase === 'playing' && (S.stage === 4 || (S.demo && ui.focus === 3)) && warn > 0 && warn <= cfg.stormWarn; pano.classList.toggle('storm', !!w);
   if (ui.focus === 3) updTune(); if (ui.focus === 4 && S.mine.order) { const b = $('#hOrdBar'); if (b) b.style.width = Math.max(0, (S.mine.order.deadline - NET.now()) / cfg.orderTime * 100) + '%'; }
 }
 function wideArt(kind) {
